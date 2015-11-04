@@ -20,4 +20,5 @@ To help with development, you can run the tests with `npm run mocha`.
     - [ ] $joins: https://www.rethinkdb.com/api/javascript/inner_join/
 - [ ] update (replace): https://www.rethinkdb.com/api/javascript/replace/
 - [ ] patch (update): https://www.rethinkdb.com/api/javascript/update/
+- [ ] changefeeds: https://www.rethinkdb.com/docs/changefeeds/javascript/
 
