@@ -77,7 +77,6 @@ export const Service = Proto.extend({
       // Prepare the special query params.
       if (params.query) {
         var filters = filter(params.query);
-        query = query.filter(params.query);
 
         // Handle $select
         if (filters.$select) {
@@ -104,6 +103,86 @@ export const Service = Proto.extend({
           query = query.skip(filters.$skip);
         }
 
+        // Parse the rest of the query for sub-queries.
+        // var queryKeys = Object.keys(params.query);
+        // for (var qkIndex = 0; qkIndex < queryKeys.length; qkIndex++) {
+        //   var queryKey = queryKeys[qkIndex];
+        // }
+        // 
+        if (params.query.$or) {
+          // orQuery will be built and passed to row('rowName').filter().
+          var orQuery;
+          // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
+          // Needs to become:
+          // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
+          for (var i = 0; i < params.query.$or.length; i++) {
+            // queryObject looks like { name: 'Alice' }
+            var queryObject = params.query.$or[i];
+            // console.log(queryObject);
+            var keys = Object.keys(queryObject);
+            
+            for (var n = 0; n < keys.length; n++) {
+              // The queryObject's key: 'name'
+              var qField = keys[n];
+              // The queryObject's value: 'Alice'
+              var qValue = queryObject[qField];
+
+
+              // Build the subQuery based on the qField.
+              var subQuery;
+              // If the qValue is an object, it will have special params in it.
+              if (typeof qValue === 'object') {
+                switch(qField){
+                  case '$or':
+                    break;
+                  case '$in':
+                    break;
+                  case '$nin':
+                    subQuery = r.row(qField).lt(qValue);
+                    break;
+                  case '$lt':
+                    subQuery = r.row(qField).lt(qValue);
+                    break;
+                  case '$lte':
+                    subQuery = r.row(qField).le(qValue);
+                    break;
+                  case '$gt':
+                    subQuery = r.row(qField).gt(qValue);
+                    break;
+                  case '$gte':
+                    subQuery = r.row(qField).ge(qValue);
+                    break;
+                  case '$ne':
+                    subQuery = r.row(qField).ne(qValue);
+                    break;
+                  case '$eq':
+                    subQuery = r.row(qField).eq(qValue);
+                    break;
+                }
+              } else {
+                  subQuery = r.row(qField).eq(qValue);
+                
+              }
+              
+
+              // Determine if there's a next key.
+              var next = !!keys[n + 1];
+
+              // At the end of the current set of attributes, determine placement.
+              if (!next) {
+                if (i === 0) {
+                  orQuery = subQuery;
+                } else {
+                  orQuery = orQuery.or(subQuery);
+                }
+              }
+            }
+          }
+          query = query.filter(orQuery);
+          delete params.query.$or;
+        }
+        // console.log(params.query);        
+        query = query.filter(params.query);
       }
 
       // Execute the query
@@ -115,6 +194,7 @@ export const Service = Proto.extend({
           return callback(err, cursor);
         }
         cursor.toArray(function(err, data){
+          // console.log(data);
           return callback(err, data);
         });
       });
