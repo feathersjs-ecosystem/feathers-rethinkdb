@@ -70,12 +70,13 @@ export const Service = Proto.extend({
     var self = this;
 
     self.ready.then(function(connection){
+      // Start with finding all, and limit when necessary.
       var query = r.table(self.options.table).filter({});
 
       // Prepare the special query params.
       if (params.query) {
         var filters = filter(params.query);
-
+        query = query.filter(params.query);
         // $select uses a specific find syntax, so it has to come first.
         // if (filters.$select) {
         //  query = this.db.find(params.query, filters.$select);
@@ -85,21 +86,24 @@ export const Service = Proto.extend({
 
         // Handle $sort
         if (filters.$sort){
-          query = query.sort(filters.$sort);
+          var fieldName = Object.keys(filters.$sort)[0];
+          if (filters.$sort[fieldName] === 1) {
+            query = query.orderBy(fieldName);
+          } else {
+            query = query.orderBy(r.desc(fieldName));
+          }
         }
 
         // Handle $limit
         if (filters.$limit){
-          query.limit(filters.$limit);
+          query = query.limit(filters.$limit);
         }
 
         // Handle $skip
         if (filters.$skip){
-          query.skip(filters.$skip);
+          query = query.skip(filters.$skip);
         }
 
-        // Start with finding all, and limit when necessary.
-        query = query.filter(params.query);
       }
 
       // Execute the query
