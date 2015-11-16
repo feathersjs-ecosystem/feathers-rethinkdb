@@ -16,9 +16,9 @@ To help with development, you can run the tests with `npm run test`.
         - [ ] create indexes on the fly. Needed for efficient orderBy: https://www.rethinkdb.com/api/javascript/index_create/
     - [x] $limit: https://www.rethinkdb.com/api/javascript/limit/
     - [x] $skip: https://www.rethinkdb.com/api/javascript/skip/
+    - [x] $select: (pluck) https://www.rethinkdb.com/api/javascript/pluck/
     - [ ] $nth: https://www.rethinkdb.com/api/javascript/nth/
     - [ ] $slice: https://www.rethinkdb.com/api/javascript/slice/
-    - [ ] $select: (pluck) https://www.rethinkdb.com/api/javascript/pluck/
     - [ ] $joins: https://www.rethinkdb.com/api/javascript/inner_join/
     - [ ] $in
     - [ ] $nin

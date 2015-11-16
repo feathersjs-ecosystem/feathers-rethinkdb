@@ -32,8 +32,8 @@ export const Service = Proto.extend({
     this.id = options.id || 'id';
     this.name = name;
     this.options = options;
-    var connectionOptions = { 
-      host: options.host, 
+    var connectionOptions = {
+      host: options.host,
       port: 28015
     };
 
@@ -77,12 +77,11 @@ export const Service = Proto.extend({
       if (params.query) {
         var filters = filter(params.query);
         query = query.filter(params.query);
-        // $select uses a specific find syntax, so it has to come first.
-        // if (filters.$select) {
-        //  query = this.db.find(params.query, filters.$select);
-        // } else {
-        //  query = this.db.find(params.query);
-        // }
+
+        // Handle $select
+        if (filters.$select) {
+          query = query.pluck(filters.$select);
+        }
 
         // Handle $sort
         if (filters.$sort){
@@ -117,7 +116,7 @@ export const Service = Proto.extend({
       });
     });
 
-    
+
   },
 
   get(id, params, callback) {
@@ -141,7 +140,7 @@ export const Service = Proto.extend({
         params.query[this.id] = id;
         query = r.table(self.options.table).filter(params.query).limit(1);
       }
-      
+
       query.run(connection, function(err, data){
         if (err) {
           return callback(err);
@@ -152,7 +151,7 @@ export const Service = Proto.extend({
         return callback(err, data);
       });
     });
-    
+
   },
 
   create: function(data, params, callback) {
@@ -196,7 +195,7 @@ export const Service = Proto.extend({
         });
       });
     });
-    
+
   },
 
   update: function(id, data, params, callback) {
@@ -225,7 +224,7 @@ export const Service = Proto.extend({
         });
       });
     });
-    
+
   },
 
   remove: function(id, params, callback) {
