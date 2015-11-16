@@ -118,7 +118,6 @@ export const Service = Proto.extend({
           for (var i = 0; i < params.query.$or.length; i++) {
             // queryObject looks like { name: 'Alice' }
             var queryObject = params.query.$or[i];
-            // console.log(queryObject);
             var keys = Object.keys(queryObject);
 
             for (var n = 0; n < keys.length; n++) {
@@ -180,7 +179,6 @@ export const Service = Proto.extend({
           query = query.filter(orQuery);
           delete params.query.$or;
         }
-        // console.log(params.query);
         query = query.filter(parseQuery(params.query));
       }
 
@@ -193,7 +191,6 @@ export const Service = Proto.extend({
           return callback(err, cursor);
         }
         cursor.toArray(function(err, data){
-          // console.log(data);
           return callback(err, data);
         });
       });
@@ -252,33 +249,29 @@ export const Service = Proto.extend({
 
   patch: function(id, data, params, callback) {
     var self = this;
+    self.ready.then(function(connection){
 
-    self.ready.then(function(){
-      // Remove id and/or _id.
-      delete data.id;
-      delete data._id;
-
-      // Run the query
-      this.db.update({'_id':id}, {$set:data}, {}, function(err, count) {
-
-        if (err) {
-          return callback(err);
+      self.get(id, {}, function(error, getData){
+        if(error){
+          return callback(error);
         }
 
-        if (!count) {
-          return callback(new errors.NotFound('No record found for id ' + id));
-        }
-
-        self.db.findOne({_id: id}, function(err, doc) {
+        // Run the query
+        r.table(self.options.table).get(id).update(data).run(connection, function(err, response){
           if (err) {
             return callback(err);
           }
-          // Send response.
-          callback(err, doc);
+          if (!response) {
+            return callback(new errors.NotFound('No record found for id ' + id));
+          }
+          if (response.replaced) {
+            var finalData = _.merge(getData, data);
+            // Send response.
+            callback(null, finalData);
+          }
         });
       });
     });
-
   },
 
   update: function(id, data, params, callback) {
@@ -289,8 +282,6 @@ export const Service = Proto.extend({
         if(error){
           return callback(error);
         }
-        // Remove id.
-        delete params[self.id];
         data.id = id;
 
         // Run the query
@@ -298,7 +289,6 @@ export const Service = Proto.extend({
           if (err) {
             return callback(err);
           }
-          console.log(response);
           if (!response) {
             return callback(new errors.NotFound('No record found for id ' + id));
           }
@@ -309,7 +299,6 @@ export const Service = Proto.extend({
         });
       });
     });
-
   },
 
   remove: function(id, params, callback) {
