@@ -24,7 +24,8 @@ export const Service = Proto.extend({
       host: 'localhost',
       port: 28015,
       db: 'feathers',
-      table: ''
+      table: '',
+      returnCursors: false
     };
     options = _.merge(defaults, options);
 
@@ -109,6 +110,9 @@ export const Service = Proto.extend({
       query.run(connection, function(err, cursor) {
         if (err) {
           return callback(err);
+        }
+        if (self.options.returnCursors) {
+          return callback(err, cursor);
         }
         cursor.toArray(function(err, data){
           return callback(err, data);
