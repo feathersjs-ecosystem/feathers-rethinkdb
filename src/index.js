@@ -126,17 +126,12 @@ export const Service = Proto.extend({
               // The queryObject's value: 'Alice'
               var qValue = queryObject[qField];
 
-
               // Build the subQuery based on the qField.
               var subQuery;
               // If the qValue is an object, it will have special params in it.
               if (typeof qValue !== 'object') {
                 subQuery = r.row(qField).eq(qValue);
               }
-
-
-              // Determine if there's a next key.
-              var next = !!keys[n + 1];
 
               // At the end of the current set of attributes, determine placement.
               if (!next) {
