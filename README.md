@@ -8,8 +8,10 @@ To help with development, you can run the tests with `npm run mocha`.
 - [x] create (insert): https://www.rethinkdb.com/api/javascript/insert/
 - [x] get (replace): https://www.rethinkdb.com/api/javascript/get/
 - [x] remove: https://www.rethinkdb.com/api/javascript/delete/
-    - [ ] Clean up remove a bit.
 - [ ] find 
+	- [x] Returns all items.
+	- [x] Filters results by a single parameter.
+	- [x] Filters results by multiple parameters.
     - [ ] $sort (orderBy) https://www.rethinkdb.com/api/javascript/order_by/
         - [ ] create indexes on the fly. Needed for orderBy: https://www.rethinkdb.com/api/javascript/index_create/
     - [ ] $limit: https://www.rethinkdb.com/api/javascript/limit/
