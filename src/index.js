@@ -108,7 +108,7 @@ export const Service = Proto.extend({
         // for (var qkIndex = 0; qkIndex < queryKeys.length; qkIndex++) {
         //   var queryKey = queryKeys[qkIndex];
         // }
-        // 
+        //
         if (params.query.$or) {
           // orQuery will be built and passed to row('rowName').filter().
           var orQuery;
@@ -120,7 +120,7 @@ export const Service = Proto.extend({
             var queryObject = params.query.$or[i];
             // console.log(queryObject);
             var keys = Object.keys(queryObject);
-            
+
             for (var n = 0; n < keys.length; n++) {
               // The queryObject's key: 'name'
               var qField = keys[n];
@@ -132,38 +132,37 @@ export const Service = Proto.extend({
               var subQuery;
               // If the qValue is an object, it will have special params in it.
               if (typeof qValue === 'object') {
-                switch(qField){
-                  case '$or':
-                    break;
-                  case '$in':
-                    break;
-                  case '$nin':
-                    subQuery = r.row(qField).lt(qValue);
-                    break;
-                  case '$lt':
-                    subQuery = r.row(qField).lt(qValue);
-                    break;
-                  case '$lte':
-                    subQuery = r.row(qField).le(qValue);
-                    break;
-                  case '$gt':
-                    subQuery = r.row(qField).gt(qValue);
-                    break;
-                  case '$gte':
-                    subQuery = r.row(qField).ge(qValue);
-                    break;
-                  case '$ne':
-                    subQuery = r.row(qField).ne(qValue);
-                    break;
-                  case '$eq':
-                    subQuery = r.row(qField).eq(qValue);
-                    break;
-                }
+                // switch(qField){
+                //   case '$or':
+                //     break;
+                //   case '$in':
+                //     break;
+                //   case '$nin':
+                //     subQuery = r.row(qField).lt(qValue);
+                //     break;
+                //   case '$lt':
+                //     subQuery = r.row(qField).lt(qValue);
+                //     break;
+                //   case '$lte':
+                //     subQuery = r.row(qField).le(qValue);
+                //     break;
+                //   case '$gt':
+                //     subQuery = r.row(qField).gt(qValue);
+                //     break;
+                //   case '$gte':
+                //     subQuery = r.row(qField).ge(qValue);
+                //     break;
+                //   case '$ne':
+                //     subQuery = r.row(qField).ne(qValue);
+                //     break;
+                //   case '$eq':
+                //     subQuery = r.row(qField).eq(qValue);
+                //     break;
+                // }
               } else {
-                  subQuery = r.row(qField).eq(qValue);
-                
+                subQuery = r.row(qField).eq(qValue);
               }
-              
+
 
               // Determine if there's a next key.
               var next = !!keys[n + 1];
@@ -181,8 +180,8 @@ export const Service = Proto.extend({
           query = query.filter(orQuery);
           delete params.query.$or;
         }
-        // console.log(params.query);        
-        query = query.filter(params.query);
+        // console.log(params.query);
+        query = query.filter(parseQuery(params.query));
       }
 
       // Execute the query
@@ -284,27 +283,29 @@ export const Service = Proto.extend({
 
   update: function(id, data, params, callback) {
     var self = this;
-    self.ready.then(function(){
-      // Remove id and/or _id.
-      delete data.id;
-      delete data._id;
+    self.ready.then(function(connection){
 
-      // Run the query
-      this.db.update({'_id':id}, data, {}, function(err, count) {
-        if (err) {
-          return callback(err);
+      self.get(id, {}, function(error){
+        if(error){
+          return callback(error);
         }
+        // Remove id.
+        delete params[self.id];
+        data.id = id;
 
-        if (!count) {
-          return callback(new errors.NotFound('No record found for id ' + id));
-        }
-
-        self.db.findOne({_id: id}, function(err, doc) {
+        // Run the query
+        r.table(self.options.table).get(id).replace(data).run(connection, function(err, response){
           if (err) {
             return callback(err);
           }
-          // Send response.
-          callback(err, doc);
+          console.log(response);
+          if (!response) {
+            return callback(new errors.NotFound('No record found for id ' + id));
+          }
+          if (response.replaced) {
+            // Send response.
+            callback(null, data);
+          }
         });
       });
     });
@@ -332,4 +333,66 @@ export const Service = Proto.extend({
 
 export default function() {
   return Proto.create.apply(Service, arguments);
+}
+
+/**
+ * Pass in a query object to get a ReQL query
+ * Must be run after special query params are removed.
+ */
+function parseQuery(obj){
+  var reQuery;
+  var theKeys = Object.keys(obj);
+  for (var index = 0; index < theKeys.length; index++) {
+    var subQuery;
+    // The queryObject's key: 'name'
+    var qField = theKeys[index];
+    // The queryObject's value: 'Alice'
+    var qValue = obj[qField];
+
+    // If the qValue is an object, it will have special params in it.
+    if (typeof qValue === 'object') {
+      switch(Object.keys(obj[qField])[0]){
+        /**
+         *  name: { $in: ['Alice', 'Bob'] }
+         *  becomes
+         *  r.expr(['Alice', 'Bob']).contains(doc['name'])
+         */
+        case '$in':
+          // subQuery = r.expr(qValue.$in).contains(doc[qField]);
+          break;
+        case '$nin':
+          // subQuery = r.expr(qValue.$in).contains(doc[qField]).not();
+          break;
+        case '$lt':
+          subQuery = r.row(qField).lt(obj[qField].$lt);
+          break;
+        case '$lte':
+          subQuery = r.row(qField).le(obj[qField].$lte);
+          break;
+        case '$gt':
+          subQuery = r.row(qField).gt(obj[qField].$gt);
+          break;
+        case '$gte':
+          subQuery = r.row(qField).ge(obj[qField].$gte);
+          break;
+        case '$ne':
+          subQuery = r.row(qField).ne(obj[qField].$ne);
+          break;
+        case '$eq':
+          subQuery = r.row(qField).eq(obj[qField].$eq);
+          break;
+      }
+    } else {
+      subQuery = r.row(qField).eq(qValue);
+    }
+
+    // At the end of the current set of attributes, determine placement.
+    if (index === 0) {
+      reQuery = subQuery;
+    } else {
+      reQuery = reQuery.and(subQuery);
+    }
+  }
+
+  return reQuery || {};
 }

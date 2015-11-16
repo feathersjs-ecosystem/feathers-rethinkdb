@@ -20,15 +20,16 @@ To help with development, you can run the tests with `npm run test`.
     - [ ] $nth: https://www.rethinkdb.com/api/javascript/nth/
     - [ ] $slice: https://www.rethinkdb.com/api/javascript/slice/
     - [ ] $joins: https://www.rethinkdb.com/api/javascript/inner_join/
-    - [x] $or - Not guaranteed transactional due to use of sub-queries.
+    - [x] $or
     - [ ] $in
     - [ ] $nin
-    - [ ] $lt
-    - [ ] $lte
-    - [ ] $gt
-    - [ ] $gte
-    - [ ] $ne
-- [ ] update (replace): https://www.rethinkdb.com/api/javascript/replace/
+    - [x] $lt
+    - [x] $lte
+    - [x] $gt
+    - [x] $gte
+    - [x] $ne
+    - [x] $eq
+- [x] update (replace): https://www.rethinkdb.com/api/javascript/replace/
 - [ ] patch (update): https://www.rethinkdb.com/api/javascript/update/
 - [ ] changefeeds: https://www.rethinkdb.com/docs/changefeeds/javascript/
 
