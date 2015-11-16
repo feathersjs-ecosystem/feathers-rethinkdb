@@ -21,7 +21,7 @@ To help with development, you can run the tests with `npm run test`.
     - [x] $or
 	    - [ ] $or needs some cleanup.  Can use the `parseQuery` function
 	    - [ ] Test some more-complex query scenarios since this adapter has to manually support MondoDB-style queries.
-    - [ ] $in
+    - [ ] $in - http://www.rethinkdb.com/api/javascript/contains/
     - [ ] $nin
     - [x] $lt
     - [x] $lte
