@@ -130,35 +130,7 @@ export const Service = Proto.extend({
               // Build the subQuery based on the qField.
               var subQuery;
               // If the qValue is an object, it will have special params in it.
-              if (typeof qValue === 'object') {
-                // switch(qField){
-                //   case '$or':
-                //     break;
-                //   case '$in':
-                //     break;
-                //   case '$nin':
-                //     subQuery = r.row(qField).lt(qValue);
-                //     break;
-                //   case '$lt':
-                //     subQuery = r.row(qField).lt(qValue);
-                //     break;
-                //   case '$lte':
-                //     subQuery = r.row(qField).le(qValue);
-                //     break;
-                //   case '$gt':
-                //     subQuery = r.row(qField).gt(qValue);
-                //     break;
-                //   case '$gte':
-                //     subQuery = r.row(qField).ge(qValue);
-                //     break;
-                //   case '$ne':
-                //     subQuery = r.row(qField).ne(qValue);
-                //     break;
-                //   case '$eq':
-                //     subQuery = r.row(qField).eq(qValue);
-                //     break;
-                // }
-              } else {
+              if (typeof qValue !== 'object') {
                 subQuery = r.row(qField).eq(qValue);
               }
 
