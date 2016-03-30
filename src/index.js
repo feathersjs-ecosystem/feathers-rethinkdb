@@ -93,13 +93,11 @@ class Service {
               }
 
               // At the end of the current set of attributes, determine placement.
-              // if (!next) {
-              //   if (i === 0) {
-              //     orQuery = subQuery;
-              //   } else {
-              //     orQuery = orQuery.or(subQuery);
-              //   }
-              // }
+              if (i === 0) {
+                orQuery = subQuery;
+              } else {
+                orQuery = orQuery.or(subQuery);
+              }
             }
           }
           query = query.filter(orQuery);
