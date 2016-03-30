@@ -1,81 +1,41 @@
 import Proto from 'uberproto';
 import filter from 'feathers-query-filters';
-import r from 'rethinkdb';
 import { types as errors } from 'feathers-errors';
 import _ from 'lodash';
+import parseQuery from './parse';
 
 // Create the service.
-export const Service = Proto.extend({
-  init: function(name, options = {}){
-    var self = this;
+class Service {
+  constructor(options){
+    if(!options){
+      throw new SyntaxError('RethinkDB options have to be provided.');
+    }
 
-    if(!name){
-      throw new SyntaxError('You must pass a String as the name of the table ' +
-        '(if you\'re connecting to a server at localhost:28015), or a configuration object.');
+    if (!options.r) {
+      throw new SyntaxError('You must provide the RethinkDB object on options.r');
     }
 
     if (!options.table) {
-      options = {
-        table: name
-      };
+      throw new SyntaxError('You must provide a table name on options.table');
     }
-
-    var defaults = {
-      host: 'localhost',
-      port: 28015,
-      db: 'feathers',
-      table: '',
-      returnCursors: false
-    };
-    options = _.merge(defaults, options);
 
     this.type = 'rethinkdb';
     this.id = options.id || 'id';
-    this.name = name;
+    this.table = options.r.table(options.table);
     this.options = options;
-    var connectionOptions = {
-      host: options.host,
-      port: 28015
-    };
+  }
 
-    // TODO: handle failed connections.
-    this.ready = new Promise(function(resolve){
-      r.connect(connectionOptions)
-      .then(function(connection){
-        // Create the db if it doesn't exist.
-        self.connection = connection;
-        return r.dbList().contains(options.db).do(function(databaseExists) {
-          return r.branch(
-            databaseExists,
-            { created: 0 },
-            r.dbCreate(options.db)
-          );
-        }).run(connection);
-      }).then(function(){
-        // Create the table if it doesn't exist.
-        self.connection.use(options.db);
-        return r.db(options.db).tableList().contains(options.table).do(function(tableExists) {
-          return r.branch(
-            tableExists,
-            { created: 0 },
-            r.db(options.db).tableCreate(options.table)
-          );
-        }).run(self.connection);
-      }).then(function(){
-        resolve(self.connection);
-      });
-    });
-  },
+  extend(obj) {
+    return Proto.extend(obj, this);
+  }
 
-  find: function(params, callback) {
-    var self = this;
-
-    self.ready.then(function(connection){
+  find(params) {
+    return new Promise((resolve, reject) => {
       // Start with finding all, and limit when necessary.
-      var query = r.table(self.options.table).filter({});
+      var query = this.table.filter({});
 
       // Prepare the special query params.
-      if (params.query) {
+      if (params && params.query) {
         var filters = filter(params.query);
 
         // Handle $select
@@ -89,7 +49,7 @@ export const Service = Proto.extend({
           if (filters.$sort[fieldName] === 1) {
             query = query.orderBy(fieldName);
           } else {
-            query = query.orderBy(r.desc(fieldName));
+            query = query.orderBy(this.options.r.desc(fieldName));
           }
         }
 
@@ -130,225 +90,171 @@ export const Service = Proto.extend({
               var subQuery;
               // If the qValue is an object, it will have special params in it.
               if (typeof qValue !== 'object') {
-                subQuery = r.row(qField).eq(qValue);
+                subQuery = this.options.r.row(qField).eq(qValue);
               }
 
               // At the end of the current set of attributes, determine placement.
-              if (!next) {
-                if (i === 0) {
-                  orQuery = subQuery;
-                } else {
-                  orQuery = orQuery.or(subQuery);
-                }
-              }
+              // if (!next) {
+              //   if (i === 0) {
+              //     orQuery = subQuery;
+              //   } else {
+              //     orQuery = orQuery.or(subQuery);
+              //   }
+              // }
             }
           }
           query = query.filter(orQuery);
           delete params.query.$or;
         }
-        query = query.filter(parseQuery(params.query));
+        query = query.filter(parseQuery(this.options.r, params.query));
       }
 
       // Execute the query
-      query.run(connection, function(err, cursor) {
-        if (err) {
-          return callback(err);
-        }
-        if (self.options.returnCursors) {
-          return callback(err, cursor);
-        }
-        cursor.toArray(function(err, data){
-          return callback(err, data);
-        });
+      return query.run().then(data => {
+        // if (this.options.returnCursors) {
+        //   return callback(err, cursor);
+        // }
+        return resolve(data);
+      })
+      .catch(err => {
+        console.log(err);
+        reject(err);
       });
     });
+  }
 
+  get(id, params) {
+    return new Promise((resolve, reject) => {
+      params = params || {};
 
-  },
-
-  get(id, params, callback) {
-    var self = this;
-    var args = arguments;
-
-    self.ready.then(function(connection){
-      if (typeof id === 'function') {
-        callback = id;
-        return callback(new errors.BadRequest('An id is required for GET operations'));
-      }
-
-      var query;
+      let query;
       // If an id was passed, just get the record.
-      if (args.length === 3) {
-        query = r.table(self.options.table).get(id);
+      if (id && !params) {
+        query = this.table.get(id);
 
       // Allow querying by params other than id.
       } else {
         params.query = params.query || {};
         params.query[this.id] = id;
-        query = r.table(self.options.table).filter(params.query).limit(1);
+        query = this.table.filter(params.query).limit(1);
       }
 
-      query.run(connection, function(err, data){
-        if (err) {
-          return callback(err);
-        }
-        if(!data) {
-          return callback(new errors.NotFound(`No record found for id '${id}'`));
-        }
-        return callback(err, data);
-      });
+      query.run()
+        .then(data => {
+          if (Array.isArray(data)) {
+            data = data[0];
+          }
+          if(!data) {
+            return reject(new errors.NotFound(`No record found for id '${id}'`));
+          }
+          return resolve(data);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
+  }
 
-  },
-
-  create: function(data, params, callback) {
-    var self = this;
-    this.ready.then(function(connection){
-      r.table(self.options.table).insert(data).run(connection, function(err, res) {
-        if(err) {
-          return callback(err);
-        }
-        data.id = res.generated_keys[0];
-        return callback(null, data);
-      });
+  // STILL NEED TO ADD params argument here.
+  create(data) {
+    return new Promise((resolve, reject) => {
+      this.table.insert(data).run()
+        .then(res => {
+          data.id = res.generated_keys[0];
+          return resolve(data);
+        })
+        .catch(err => {
+          return reject(err);
+        });
     });
-  },
+  }
 
-  patch: function(id, data, params, callback) {
-    var self = this;
-    self.ready.then(function(connection){
-
-      self.get(id, {}, function(error, getData){
+  // STILL NEED TO ADD params argument here.
+  patch(id, data) {
+    return new Promise((resolve, reject) => {
+      // Find the original record, first.
+      this.get(id, {}, function(error, getData){
         if(error){
-          return callback(error);
+          return reject(error);
         }
 
         // Run the query
-        r.table(self.options.table).get(id).update(data).run(connection, function(err, response){
-          if (err) {
-            return callback(err);
-          }
-          if (!response) {
-            return callback(new errors.NotFound('No record found for id ' + id));
-          }
-          if (response.replaced) {
-            var finalData = _.merge(getData, data);
-            // Send response.
-            callback(null, finalData);
-          }
-        });
+        this.table.get(id).update(data).run()
+          .then((err, response) => {
+            if (err) {
+              return reject(err);
+            }
+            if (!response) {
+              return reject(new errors.NotFound('No record found for id ' + id));
+            }
+            if (response.replaced) {
+              var finalData = _.merge(getData, data);
+              // Send response.
+              resolve(finalData);
+            }
+          });
       });
     });
-  },
-
-  update: function(id, data, params, callback) {
-    var self = this;
-    self.ready.then(function(connection){
-
-      self.get(id, {}, function(error){
-        if(error){
-          return callback(error);
-        }
-        data.id = id;
-
-        // Run the query
-        r.table(self.options.table).get(id).replace(data).run(connection, function(err, response){
-          if (err) {
-            return callback(err);
-          }
-          if (!response) {
-            return callback(new errors.NotFound('No record found for id ' + id));
-          }
-          if (response.replaced) {
-            // Send response.
-            callback(null, data);
-          }
-        });
-      });
-    });
-  },
-
-  remove: function(id, params, callback) {
-    var self = this;
-    self.ready.then(function(connection){
-      r.table(self.options.table).get(id).delete({returnChanges: true}).run(connection, function(err, res) {
-        if (err) {
-          return callback(err);
-        }
-        return callback(null, res.changes[0] && res.changes[0].old_val || {id: id});
-      });
-    });
-
-  },
-
-  setup: function(app) {
-    this.app = app;
-    this.service = app.service.bind(app);
   }
-});
 
-export default function() {
-  return Proto.create.apply(Service, arguments);
-}
+  // Not sure if we need the params here.
+  update(id, data) {
+    return new Promise((resolve, reject) => {
+      // Find the original record, first.
+      this.get(id)
+        .then(getData => {
+          getData.id = id;
+          // Update the found record.
+          this.table.get(id).replace(data).run()
+            .then(res => {
+              if (!res) {
+                return reject(new errors.NotFound('No record found for id ' + id));
+              }
+              if (res.replaced) {
+                return resolve(data);
+              }
+            })
+            .catch(err => {
+              return reject(err);
+            });
+        })
+        .catch(err => {
+          return reject(err);
+        });
+      });
+  }
 
-/**
- * Pass in a query object to get a ReQL query
- * Must be run after special query params are removed.
- */
-function parseQuery(obj){
-  var reQuery;
-  var theKeys = Object.keys(obj);
-  for (var index = 0; index < theKeys.length; index++) {
-    var subQuery;
-    // The queryObject's key: 'name'
-    var qField = theKeys[index];
-    // The queryObject's value: 'Alice'
-    var qValue = obj[qField];
+  remove(id, params) {
+    return new Promise((resolve, reject) => {
+      let query = this.table.get(id);
+      params = params || {};
 
-    // If the qValue is an object, it will have special params in it.
-    if (typeof qValue === 'object') {
-      switch(Object.keys(obj[qField])[0]){
-        /**
-         *  name: { $in: ['Alice', 'Bob'] }
-         *  becomes
-         *  r.expr(['Alice', 'Bob']).contains(doc['name'])
-         */
-        case '$in':
-          // subQuery = r.expr(qValue.$in).contains(doc[qField]);
-          break;
-        case '$nin':
-          // subQuery = r.expr(qValue.$in).contains(doc[qField]).not();
-          break;
-        case '$lt':
-          subQuery = r.row(qField).lt(obj[qField].$lt);
-          break;
-        case '$lte':
-          subQuery = r.row(qField).le(obj[qField].$lte);
-          break;
-        case '$gt':
-          subQuery = r.row(qField).gt(obj[qField].$gt);
-          break;
-        case '$gte':
-          subQuery = r.row(qField).ge(obj[qField].$gte);
-          break;
-        case '$ne':
-          subQuery = r.row(qField).ne(obj[qField].$ne);
-          break;
-        case '$eq':
-          subQuery = r.row(qField).eq(obj[qField].$eq);
-          break;
+      if (!id) {
+        params.query = params.query || {};
+        query = this.table.filter(params.query);
       }
-    } else {
-      subQuery = r.row(qField).eq(qValue);
-    }
-
-    // At the end of the current set of attributes, determine placement.
-    if (index === 0) {
-      reQuery = subQuery;
-    } else {
-      reQuery = reQuery.and(subQuery);
-    }
+      query.delete({returnChanges: true}).run()
+        .then(res => {
+          if (!res.changes) {
+            return resolve([]);
+          } else if (res.changes.length <= 1) {
+            return resolve(res.changes[0] && res.changes[0].old_val);
+          } else {
+            let changes = res.changes.map(changed => {
+              return changed.old_val;
+            });
+            return resolve(changes);
+          }
+        })
+        .catch(err => {
+          return reject(err);
+        });
+    });
   }
-
-  return reQuery || {};
 }
+
+export default function init(options) {
+  return new Service(options);
+}
+
+init.Service = Service;

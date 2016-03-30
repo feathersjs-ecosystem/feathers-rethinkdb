@@ -1,56 +1,93 @@
 import chai from 'chai';
-import baseTests from 'feathers-service-tests';
-import { errors } from 'feathers';
+import { base } from 'feathers-service-tests';
+// import { base, example } from 'feathers-service-tests';
+import errors from 'feathers-errors';
 import service from '../src';
-import r from 'rethinkdb';
+import rethink from 'rethinkdbdash';
+// import server from './test-app';
+const r = rethink({
+  db: 'feathers'
+});
 
 let expect = chai.expect;
 let _ids = {};
-let options = {};
-let people = service('people', options);
+let people = service({r, table: 'people'});
 
 function clean(done) {
-  people.ready.then(function(connection){
-    r.table(people.options.table).delete().run(connection, function(err){
-      if (err) {
-        return done(err);
-      }
+  r.table('people').delete().run()
+    .then(() => {
+      return r.table('todos').delete().run();
+    })
+    .then(() => {
+      done();
+    })
+    .catch(() => {
       done();
     });
-  });
 }
+
+function create(done) {
+  r.dbList().contains('feathers')
+    // Create the db if it doesn't exist.
+    .do(function(databaseExists) {
+      return r.branch( databaseExists, { created: 0 }, r.dbCreate('feathers') );
+    })
+    .run()
+    // Create the todos table if it doesn't exist.
+    .then(() => {
+      return r.db('feathers').tableList().contains('todos')
+        .do(function(tableExists) {
+          return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('todos') );
+        }).run();
+    })
+    // Create the people table if it doesn't exist.
+    .then(() => {
+      return r.db('feathers').tableList().contains('people')
+        .do(function(tableExists) {
+          return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('people') );
+        }).run();
+    })
+    .then(() => {
+      done();
+    });
+}
+
 
 describe('feathers-rethinkdb', () => {
 
-  before(clean);
+  before(create);
   after(clean);
 
   beforeEach(done => {
     people.create({
       name: 'Doug',
       age: 32
-    }, {}, (error, data) => {
-      if (error) {
-        console.error(error);
-      }
-      _ids.Doug = data.id;
-      done();
-    });
+    }, {})
+      .then(data => {
+        _ids.Doug = data.id;
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
   });
 
   afterEach(done => {
-    people.remove(_ids.Doug, {}, (error) => {
-      if (error) {
-        console.error(error);
-      }
+    people.remove().then(() => {
       done();
-    });
+    })
+    .catch(done);
   });
 
   it('basic functionality', done => {
-    console.log(expect);
     expect(typeof 1).to.equal('number');
     done();
   });
-  baseTests(people, _ids, errors.types);
+  base(people, _ids, errors.types);
 });
+
+// describe('RethinkDB service example test', () => {
+//   after(done => server.close(() => done()));
+//
+//   example('_id');
+// });
