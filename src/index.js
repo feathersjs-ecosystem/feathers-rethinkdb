@@ -219,11 +219,11 @@ class Service {
       }
       query.delete({returnChanges: true}).run()
         .then(res => {
-          if (!res.changes) {
-            return resolve([]);
-          } else {
+          if (res.changes && res.changes.length) {
             let changes = res.changes.map(change => change.old_val);
             return resolve(changes.length === 1 ? changes[0] : changes);
+          } else {
+            return resolve([]);
           }
         })
         .catch(reject);
