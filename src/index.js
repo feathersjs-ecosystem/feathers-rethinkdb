@@ -207,11 +207,13 @@ class Service {
 
   remove(id, params) {
     return new Promise((resolve, reject) => {
-      let query = this.table.get(id);
-      params = params || {};
+      let query;
 
-      // TODO: Seems like we should do something to mitigate wiping out all of your data on accident.
-      if (!id) {
+      // You have to pass id=null to remove all records.
+      if (id !== null && id !== undefined) {
+        query = this.table.get(id);
+      } else {
+        params = params || {};
         params.query = params.query || {};
         query = this.table.filter(params.query);
       }
@@ -219,13 +221,9 @@ class Service {
         .then(res => {
           if (!res.changes) {
             return resolve([]);
-          } else if (res.changes.length <= 1) {
-            return resolve(res.changes[0] && res.changes[0].old_val);
           } else {
-            let changes = res.changes.map(changed => {
-              return changed.old_val;
-            });
-            return resolve(changes);
+            let changes = res.changes.map(change => change.old_val);
+            return resolve(changes.length === 1 ? changes[0] : changes);
           }
         })
         .catch(reject);
