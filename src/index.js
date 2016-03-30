@@ -1,7 +1,6 @@
 import Proto from 'uberproto';
 import filter from 'feathers-query-filters';
 import { types as errors } from 'feathers-errors';
-import _ from 'lodash';
 import parseQuery from './parse';
 
 // Create the service.
@@ -125,17 +124,14 @@ class Service {
 
   get(id, params) {
     return new Promise((resolve, reject) => {
-      params = params || {};
-
       let query;
       // If an id was passed, just get the record.
-      if (id && !params) {
+      if (id !== null && id !== undefined) {
         query = this.table.get(id);
 
-      // Allow querying by params other than id.
+      // If no id was passed, use params.query
       } else {
-        params.query = params.query || {};
-        params.query[this.id] = id;
+        params = params || {query:{}};
         query = this.table.filter(params.query).limit(1);
       }
 
@@ -149,9 +145,7 @@ class Service {
           }
           return resolve(data);
         })
-        .catch(err => {
-          reject(err);
-        });
+        .catch(reject);
     });
   }
 
@@ -163,64 +157,51 @@ class Service {
           data.id = res.generated_keys[0];
           return resolve(data);
         })
-        .catch(err => {
-          return reject(err);
-        });
+        .catch(reject);
     });
   }
 
-  // STILL NEED TO ADD params argument here.
-  patch(id, data) {
+  patch(id, data, params) {
     return new Promise((resolve, reject) => {
-      // Find the original record, first.
-      this.get(id, {}, function(error, getData){
-        if(error){
-          return reject(error);
+      let query;
+      if (id !== null && id !== undefined) {
+        query = this.get(id);
+      } else if (params) {
+        query = this.find(params);
+      } else {
+        return reject(new Error('Patch requires an ID or params'));
+      }
+      // Find the original record(s), first, then patch them.
+      query.then(getData => {
+        let query;
+        if (Array.isArray(getData)) {
+          let ids = getData.map(item => item.id);
+          query = this.table.getAll(...ids);
+        } else {
+          query = this.table.get(id);
         }
-
-        // Run the query
-        this.table.get(id).update(data).run()
-          .then((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            if (!response) {
-              return reject(new errors.NotFound('No record found for id ' + id));
-            }
-            if (response.replaced) {
-              var finalData = _.merge(getData, data);
-              // Send response.
-              resolve(finalData);
-            }
-          });
-      });
+        query.update(data, {returnChanges: true}).run()
+          .then(response => {
+            let changes = response.changes.map(change => change.new_val);
+            resolve(changes.length === 1 ? changes[0] : changes);
+          })
+          .catch(reject);
+      })
+      .catch(reject);
     });
   }
 
-  // Not sure if we need the params here.
   update(id, data) {
     return new Promise((resolve, reject) => {
-      // Find the original record, first.
+      // Find the original record, first, then update it.
       this.get(id)
         .then(getData => {
-          getData.id = id;
-          // Update the found record.
-          this.table.get(id).replace(data).run()
-            .then(res => {
-              if (!res) {
-                return reject(new errors.NotFound('No record found for id ' + id));
-              }
-              if (res.replaced) {
-                return resolve(data);
-              }
-            })
-            .catch(err => {
-              return reject(err);
-            });
+          data.id = id;
+          this.table.get(getData.id).replace(data, {returnChanges: true}).run()
+            .then(result => resolve(result.changes[0].new_val))
+            .catch(reject);
         })
-        .catch(err => {
-          return reject(err);
-        });
+        .catch(reject);
       });
   }
 
@@ -229,6 +210,7 @@ class Service {
       let query = this.table.get(id);
       params = params || {};
 
+      // TODO: Seems like we should do something to mitigate wiping out all of your data on accident.
       if (!id) {
         params.query = params.query || {};
         query = this.table.filter(params.query);
@@ -246,9 +228,7 @@ class Service {
             return resolve(changes);
           }
         })
-        .catch(err => {
-          return reject(err);
-        });
+        .catch(reject);
     });
   }
 }

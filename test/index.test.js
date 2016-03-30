@@ -9,9 +9,27 @@ const r = rethink({
   db: 'feathers'
 });
 
+// RethinkDB: if no other sort order is given. This means that items can not be returned in the
+// same order they have been created so this counter is used for sorting instead.
+let counter = 0;
+
 let expect = chai.expect;
 let _ids = {};
-let people = service({r, table: 'people'});
+let people = service({r, table: 'people'}).extend({
+  _find(params) {
+    params.query = params.query || {};
+    if(!params.query.$sort) {
+      params.query.$sort = { counter: 1 };
+    }
+
+    return this._super.apply(this, arguments);
+  },
+
+  create(data, params) {
+    data.counter = ++counter;
+    return this._super(data, params);
+  }
+});
 
 function clean(done) {
   r.table('people').delete().run()
