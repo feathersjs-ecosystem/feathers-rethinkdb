@@ -2,47 +2,52 @@
  * Pass in a query object to get a ReQL query
  * Must be run after special query params are removed.
  */
-export default function parseQuery(r, obj){
-  var reQuery;
-  var theKeys = Object.keys(obj);
-  for (var index = 0; index < theKeys.length; index++) {
-    var subQuery;
-    // The queryObject's key: 'name'
-    var qField = theKeys[index];
+export default function parseQuery(service, reQuery, params){
+  let r = service.options.r,
+    theKeys = Object.keys(params);
+
+  theKeys.forEach(qField => {
+    let isFilter = false, subQuery;
     // The queryObject's value: 'Alice'
-    var qValue = obj[qField];
+    var qValue = params[qField];
 
     // If the qValue is an object, it will have special params in it.
     if (typeof qValue === 'object') {
-      switch(Object.keys(obj[qField])[0]){
+      switch(Object.keys(qValue)[0]){
         /**
          *  name: { $in: ['Alice', 'Bob'] }
          *  becomes
          *  r.expr(['Alice', 'Bob']).contains(doc['name'])
          */
         case '$in':
-          // subQuery = r.expr(qValue.$in).contains(doc[qField]);
+          isFilter = true;
+          reQuery = reQuery.filter(function(doc) {
+            return service.options.r.expr(qValue.$in).contains(doc(qField));
+          });
           break;
         case '$nin':
-          // subQuery = r.expr(qValue.$in).contains(doc[qField]).not();
+          isFilter = true;
+          reQuery = reQuery.filter(function(doc) {
+            return service.options.r.expr(qValue.$nin).contains(doc(qField)).not();
+          });
           break;
         case '$lt':
-          subQuery = r.row(qField).lt(obj[qField].$lt);
+          subQuery = r.row(qField).lt(params[qField].$lt);
           break;
         case '$lte':
-          subQuery = r.row(qField).le(obj[qField].$lte);
+          subQuery = r.row(qField).le(params[qField].$lte);
           break;
         case '$gt':
-          subQuery = r.row(qField).gt(obj[qField].$gt);
+          subQuery = r.row(qField).gt(params[qField].$gt);
           break;
         case '$gte':
-          subQuery = r.row(qField).ge(obj[qField].$gte);
+          subQuery = r.row(qField).ge(params[qField].$gte);
           break;
         case '$ne':
-          subQuery = r.row(qField).ne(obj[qField].$ne);
+          subQuery = r.row(qField).ne(params[qField].$ne);
           break;
         case '$eq':
-          subQuery = r.row(qField).eq(obj[qField].$eq);
+          subQuery = r.row(qField).eq(params[qField].$eq);
           break;
       }
     } else {
@@ -50,12 +55,11 @@ export default function parseQuery(r, obj){
     }
 
     // At the end of the current set of attributes, determine placement.
-    if (index === 0) {
-      reQuery = subQuery;
-    } else {
+    if (subQuery) {
+      reQuery = reQuery.filter(subQuery);
+    } else if(!isFilter) {
       reQuery = reQuery.and(subQuery);
     }
-  }
-
-  return reQuery || {};
+  });
+  return reQuery;
 }
