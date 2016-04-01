@@ -1,10 +1,9 @@
 import chai from 'chai';
-import { base } from 'feathers-service-tests';
-// import { base, example } from 'feathers-service-tests';
+import { base, example } from 'feathers-service-tests';
 import errors from 'feathers-errors';
 import service from '../src';
 import rethink from 'rethinkdbdash';
-// import server from './test-app';
+import server from './test-app';
 const r = rethink({
   db: 'feathers'
 });
@@ -15,14 +14,19 @@ let counter = 0;
 
 let expect = chai.expect;
 let _ids = {};
-let people = service({r, table: 'people'}).extend({
+
+let people = service({
+  Model: r,
+  name: 'people'
+}).extend({
   _find(params) {
+    params = params || {};
     params.query = params.query || {};
     if(!params.query.$sort) {
       params.query.$sort = { counter: 1 };
     }
 
-    return this._super.apply(this, arguments);
+    return this._super(params);
   },
 
   create(data, params) {
@@ -32,32 +36,29 @@ let people = service({r, table: 'people'}).extend({
 });
 
 function clean(done) {
-  r.table('people').delete().run()
-    .then(() => {
-      return r.table('todos').delete().run();
-    })
-    .then(() => {
-      done();
-    })
-    .catch(() => {
-      done();
-    });
+  r.table('people').delete(null).run()
+    .then(() => r.table('todos').delete().run())
+    .then(() => r.db('test').table('todos').delete().run())
+    .then(() => done())
+    .catch(done);
 }
 
 function create(done) {
-  r.dbList().contains('feathers')
-    // Create the db if it doesn't exist.
-    .do(function(databaseExists) {
-      return r.branch( databaseExists, { created: 0 }, r.dbCreate('feathers') );
-    })
-    .run()
+  counter = 0;
+  // Create the db if it doesn't exist.
+  r.dbList().contains('feathers').do(databaseExists => r.branch( databaseExists, { created: 0 }, r.dbCreate('feathers'))).run()
+    .then(() => r.dbList().contains('test').do(databaseExists => r.branch( databaseExists, { created: 0 }, r.dbCreate('test'))).run())
     // Create the todos table if it doesn't exist.
-    .then(() => {
-      return r.db('feathers').tableList().contains('todos')
-        .do(function(tableExists) {
-          return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('todos') );
-        }).run();
-    })
+    .then(() => r.db('feathers').tableList().contains('todos')
+      .do(function(tableExists) {
+        return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('todos') );
+      }).run()
+    )
+    .then(() => r.db('test').tableList().contains('todos')
+      .do(function(tableExists) {
+        return r.branch( tableExists, { created: 0 }, r.db('test').tableCreate('todos') );
+      }).run()
+    )
     // Create the people table if it doesn't exist.
     .then(() => {
       return r.db('feathers').tableList().contains('people')
@@ -91,7 +92,7 @@ describe('feathers-rethinkdb', () => {
   });
 
   afterEach(done => {
-    people.remove().then(() => {
+    people.remove(null).then(() => {
       done();
     })
     .catch(done);
@@ -104,8 +105,8 @@ describe('feathers-rethinkdb', () => {
   base(people, _ids, errors.types);
 });
 
-// describe('RethinkDB service example test', () => {
-//   after(done => server.close(() => done()));
-//
-//   example('_id');
-// });
+describe('RethinkDB service example test', () => {
+  after(done => server.close(() => done()));
+
+  example('id');
+});

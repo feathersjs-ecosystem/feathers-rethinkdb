@@ -10,114 +10,135 @@ class Service {
       throw new SyntaxError('RethinkDB options have to be provided.');
     }
 
-    if (!options.r) {
-      throw new SyntaxError('You must provide the RethinkDB object on options.r');
+    if (options.Model) {
+      options.r = options.Model;
+    } else {
+      throw new SyntaxError('You must provide the RethinkDB object on options.Model');
     }
 
-    if (!options.table) {
-      throw new SyntaxError('You must provide a table name on options.table');
+    // Make sure the user connected a database before creating the service.
+    if (!options.r._poolMaster._options.db) {
+      throw new SyntaxError('You must provide either an instance of r that is preconfigured with a db, or a provide options.db.');
+    }
+
+    if (!options.name) {
+      throw new SyntaxError('You must provide a table name on options.name');
     }
 
     this.type = 'rethinkdb';
     this.id = options.id || 'id';
-    this.table = options.r.table(options.table);
+    this.table = options.r.table(options.name);
     this.options = options;
+    this.paginate = options.paginate || {};
   }
 
   extend(obj) {
     return Proto.extend(obj, this);
   }
 
-  find(params) {
+  _find(params = {}) {
+    var r = this.options.r;
     return new Promise((resolve, reject) => {
+      params.query = params.query || {};
+
       // Start with finding all, and limit when necessary.
-      var query = this.table.filter({});
+      var query = this.table.filter({}),
+        // Prepare the special query params.
+        filters = filter(params.query, this.paginate);
 
-      // Prepare the special query params.
-      if (params && params.query) {
-        var filters = filter(params.query);
+      // Handle $select
+      if (filters.$select) {
+        query = query.pluck(filters.$select);
+      }
 
-        // Handle $select
-        if (filters.$select) {
-          query = query.pluck(filters.$select);
+      // Handle $sort
+      if (filters.$sort){
+        var fieldName = Object.keys(filters.$sort)[0];
+        if (filters.$sort[fieldName] === 1) {
+          query = query.orderBy(fieldName);
+        } else {
+          query = query.orderBy(r.desc(fieldName));
         }
+      }
 
-        // Handle $sort
-        if (filters.$sort){
-          var fieldName = Object.keys(filters.$sort)[0];
-          if (filters.$sort[fieldName] === 1) {
-            query = query.orderBy(fieldName);
-          } else {
-            query = query.orderBy(this.options.r.desc(fieldName));
-          }
-        }
+      // Handle $or
+      // TODO (@marshallswain): Handle $or queries with nested specials.
+      // Right now they won't work and we'd need to start diving
+      // into nested where conditions.
+      if (params.query.$or) {
+        // orQuery will be built and passed to row('rowName').filter().
+        var orQuery;
+        // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
+        // Needs to become:
+        // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
+        params.query.$or.forEach((queryObject, i) => {
+          // queryObject looks like { name: 'Alice' }
+          var keys = Object.keys(queryObject);
 
-        // Handle $limit
-        if (filters.$limit){
-          query = query.limit(filters.$limit);
-        }
+          keys.forEach(qField => {
+            // The queryObject's value: 'Alice'
+            let qValue = queryObject[qField];
 
-        // Handle $skip
-        if (filters.$skip){
-          query = query.skip(filters.$skip);
-        }
-
-        // Parse the rest of the query for sub-queries.
-        // var queryKeys = Object.keys(params.query);
-        // for (var qkIndex = 0; qkIndex < queryKeys.length; qkIndex++) {
-        //   var queryKey = queryKeys[qkIndex];
-        // }
-        //
-        if (params.query.$or) {
-          // orQuery will be built and passed to row('rowName').filter().
-          var orQuery;
-          // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
-          // Needs to become:
-          // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
-          for (var i = 0; i < params.query.$or.length; i++) {
-            // queryObject looks like { name: 'Alice' }
-            var queryObject = params.query.$or[i];
-            var keys = Object.keys(queryObject);
-
-            for (var n = 0; n < keys.length; n++) {
-              // The queryObject's key: 'name'
-              var qField = keys[n];
-              // The queryObject's value: 'Alice'
-              var qValue = queryObject[qField];
-
-              // Build the subQuery based on the qField.
-              var subQuery;
-              // If the qValue is an object, it will have special params in it.
-              if (typeof qValue !== 'object') {
-                subQuery = this.options.r.row(qField).eq(qValue);
-              }
-
-              // At the end of the current set of attributes, determine placement.
-              if (i === 0) {
-                orQuery = subQuery;
-              } else {
-                orQuery = orQuery.or(subQuery);
-              }
+            // Build the subQuery based on the qField.
+            var subQuery;
+            // If the qValue is an object, it will have special params in it.
+            if (typeof qValue !== 'object') {
+              subQuery = r.row(qField).eq(qValue);
             }
-          }
-          query = query.filter(orQuery);
-          delete params.query.$or;
-        }
-        query = query.filter(parseQuery(this.options.r, params.query));
+
+            // At the end of the current set of attributes, determine placement.
+            if (i === 0) {
+              orQuery = subQuery;
+            } else {
+              orQuery = orQuery.or(subQuery);
+            }
+          });
+        });
+        query = query.filter(orQuery);
+        delete params.query.$or;
+      }
+      query = parseQuery(this, query, params.query);
+
+      var countQuery;
+
+      // For pagination, count has to run as a separate query, but without limit.
+      if (this.paginate.default) {
+        countQuery = query.count().run();
+      }
+
+      // Handle $skip AFTER the count query but BEFORE $limit.
+      if (filters.$skip){
+        query = query.skip(filters.$skip);
+      }
+      // Handle $limit AFTER the count query and $skip.
+      if (filters.$limit){
+        query = query.limit(filters.$limit);
       }
 
       // Execute the query
-      return query.run().then(data => {
+      return Promise.all([query, countQuery]).then(responses => {
+        let data = responses[0];
         // if (this.options.returnCursors) {
         //   return callback(err, cursor);
         // }
+        if (this.paginate.default) {
+          data = {
+            total: responses[1],
+            limit: filters.$limit,
+            skip: filters.$skip || 0,
+            data
+          };
+        }
+
+
         return resolve(data);
       })
-      .catch(err => {
-        console.log(err);
-        reject(err);
-      });
+      .catch(err => reject(err));
     });
+  }
+
+  find(params){
+    return this._find(params);
   }
 
   get(id, params) {
@@ -210,10 +231,11 @@ class Service {
       // You have to pass id=null to remove all records.
       if (id !== null && id !== undefined) {
         query = this.table.get(id);
+      } else if (id === null) {
+        const queryParams = Object.assign({}, params && params.query);
+        query = this.table.filter(queryParams);
       } else {
-        params = params || {};
-        params.query = params.query || {};
-        query = this.table.filter(params.query);
+        return reject(new Error('You must pass either an id or params to remove.'));
       }
       query.delete({returnChanges: true}).run()
         .then(res => {

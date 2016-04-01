@@ -4,14 +4,32 @@ const rest = require('feathers-rest');
 const socketio = require('feathers-socketio');
 const bodyParser = require('body-parser');
 const service = require('../lib').default;
-const r = rethink();
+const r = rethink({
+  db: 'feathers'
+});
 
+var counter = 0;
 const todoService = service({
-  r,
-  table: 'todos',
+  Model: r,
+  name: 'todos',
   paginate: {
     default: 2,
     max: 4
+  }
+}).extend({
+  _find(params) {
+    params = params || {};
+    params.query = params.query || {};
+    if(!params.query.$sort) {
+      params.query.$sort = { counter: 1 };
+    }
+
+    return this._super(params);
+  },
+
+  create(data, params) {
+    data.counter = ++counter;
+    return this._super(data, params);
   }
 });
 
