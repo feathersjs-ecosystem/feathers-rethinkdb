@@ -51,7 +51,7 @@ var app = feathers()
 r.dbList().contains('feathers')
   .do(dbExists => r.branch(dbExists, {created: 0}, r.dbCreate('feathers'))).run()
   // Create the table if it doesn't exist.
-  .then(() => r.dbList().contains('messages')
+  .then(() => r.db('feathers').tableList().contains('messages')
     .do(tableExists => r.branch( tableExists, {created: 0}, r.dbCreate('messages'))).run())
   // Create and register a Feathers service.
   .then(() => {
