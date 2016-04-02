@@ -45,8 +45,6 @@
     "debug": "^2.2.0",
     "feathers-errors": "^2.0.2",
     "feathers-query-filters": "^1.5.1",
-    "lodash": "^3.10.1",
-    "rethinkdbdash": "^2.2.18",
     "uberproto": "^1.2.0"
   },
   "devDependencies": {
@@ -60,6 +58,7 @@
     "feathers-socketio": "^1.3.3",
     "jshint": "^2.9.1",
     "mocha": "^2.4.5",
-    "nsp": "^2.2.2"
+    "nsp": "^2.2.2",
+    "rethinkdbdash": "^2.2.18"
   }
 }
