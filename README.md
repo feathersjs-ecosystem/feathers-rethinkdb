@@ -17,7 +17,7 @@ Please refer to the [Feathers database adapter documentation](http://docs.feathe
 - [Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
 - [Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
 
-The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the rethinkdb node driver which simplifies the connection process.  It also provides some other benefits like connection pooling .
+The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process.  It also provides some other benefits like connection pooling .
 
 ## Complete Example
 
@@ -38,10 +38,10 @@ const r = rethink({
 
 // Create a feathers instance.
 var app = feathers()
-	// Enable the REST provider for services.
-	.configure(rest())
-	// Enable the socketio provider for services.
-	.configure(socketio())
+  // Enable the REST provider for services.
+  .configure(rest())
+  // Enable the socketio provider for services.
+  .configure(socketio())
   // Turn on JSON parser for REST services
   .use(bodyParser.json())
   // Turn on URL-encoded parser for REST services
@@ -49,22 +49,22 @@ var app = feathers()
 
 // Create your database if it doesn't exist.
 r.dbList().contains('feathers')
-	.do(dbExists => r.branch(dbExists, {created: 0}, r.dbCreate('feathers'))).run()
-	// Create the table if it doesn't exist.
-	.then(() => r.dbList().contains('messages')
-		.do(tableExists => r.branch( tableExists, {created: 0}, r.dbCreate('messages'))).run())
-	// Create and register a Feathers service.
-	.then(() => {
-		app.use('messages', service({
-		  Model: r,
-			name: 'messages',
-		  paginate: {
-		    default: 10,
-		    max: 50
-		  }
-		}));
-	})
-	.catch(err => console.log(err));
+  .do(dbExists => r.branch(dbExists, {created: 0}, r.dbCreate('feathers'))).run()
+  // Create the table if it doesn't exist.
+  .then(() => r.dbList().contains('messages')
+    .do(tableExists => r.branch( tableExists, {created: 0}, r.dbCreate('messages'))).run())
+  // Create and register a Feathers service.
+  .then(() => {
+    app.use('messages', service({
+      Model: r,
+      name: 'messages',
+      paginate: {
+        default: 10,
+        max: 50
+      }
+    }));
+  })
+  .catch(err => console.log(err));
 
 // Start the server.
 var port = 3030;
