@@ -1,35 +1,94 @@
 # feathers-rethinkdb
-Create a RethinkDB service for FeathersJS.
 
-## Not ready for production. It's only passing some of the tests.  
-To help with development, you can run the tests with `npm run test`.
+> Create a [RethinkDB](https://rethinkdb.com/) Service for [FeatherJS](https://github.com/feathersjs).
 
-## TODO: implement
-- [x] create (insert): https://www.rethinkdb.com/api/javascript/insert/
-- [x] get (replace): https://www.rethinkdb.com/api/javascript/get/
-- [x] remove: https://www.rethinkdb.com/api/javascript/delete/
-- [ ] find 
-	- [x] Returns all items.
-	- [x] Filters results by a single parameter.
-	- [x] Filters results by multiple parameters.
-    - [x] $sort (orderBy) https://www.rethinkdb.com/api/javascript/order_by/
-        - [ ] create indexes on the fly. Needed for a more efficient orderBy: https://www.rethinkdb.com/api/javascript/index_create/
-    - [x] $limit: https://www.rethinkdb.com/api/javascript/limit/
-    - [x] $skip: https://www.rethinkdb.com/api/javascript/skip/
-    - [x] $select: (pluck) https://www.rethinkdb.com/api/javascript/pluck/
-    - [ ] $joins: https://www.rethinkdb.com/api/javascript/inner_join/
-    - [x] $or
-	    - [ ] $or needs some cleanup.  Can use the `parseQuery` function
-	    - [ ] Test some more-complex query scenarios since this adapter has to manually support MondoDB-style queries.
-    - [ ] $in - http://www.rethinkdb.com/api/javascript/contains/
-    - [ ] $nin
-    - [x] $lt
-    - [x] $lte
-    - [x] $gt
-    - [x] $gte
-    - [x] $ne
-    - [x] $eq
-- [x] update (replace): https://www.rethinkdb.com/api/javascript/replace/
-- [x] patch (update): https://www.rethinkdb.com/api/javascript/update/
-- [ ] docs
+## Installation
 
+```bash
+npm install rethinkdbdash feathers-rethinkdb --save
+```
+
+## Documentation
+
+Please refer to the [Feathers database adapter documentation](http://docs.feathersjs.com/databases/readme.html) for more details or directly at:
+
+- [RethinkDB](http://docs.feathersjs.com/databases/rethinkdb.html) - The detailed documentation for this adapter
+- [Extending](http://docs.feathersjs.com/databases/extending.html) - How to extend a database adapter
+- [Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
+- [Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
+
+The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the rethinkdb node driver which simplifies the connection process.  It also provides some other benefits like connection pooling .
+
+## Complete Example
+
+Here's an example of a Feathers server with a `messages` RethinkDB service.
+
+```js
+const rethink = require('rethinkdbdash');
+const feathers = require('feathers');
+const rest = require('feathers-rest');
+const socketio = require('feathers-socketio');
+const bodyParser = require('body-parser');
+const service = require('../lib');
+
+// Connect to a local RethinkDB server.
+const r = rethink({
+  db: 'feathers'
+});
+
+// Create a feathers instance.
+var app = feathers()
+	// Enable the REST provider for services.
+	.configure(rest())
+	// Enable the socketio provider for services.
+	.configure(socketio())
+  // Turn on JSON parser for REST services
+  .use(bodyParser.json())
+  // Turn on URL-encoded parser for REST services
+  .use(bodyParser.urlencoded({extended: true}));
+
+// Create your database if it doesn't exist.
+r.dbList().contains('feathers')
+	.do(dbExists => r.branch(dbExists, {created: 0}, r.dbCreate('feathers'))).run()
+	// Create the table if it doesn't exist.
+	.then(() => r.dbList().contains('messages')
+		.do(tableExists => r.branch( tableExists, {created: 0}, r.dbCreate('messages'))).run())
+	// Create and register a Feathers service.
+	.then(() => {
+		app.use('messages', service({
+		  Model: r,
+			name: 'messages',
+		  paginate: {
+		    default: 10,
+		    max: 50
+		  }
+		}));
+	})
+	.catch(err => console.log(err));
+
+// Start the server.
+var port = 3030;
+app.listen(port, function() {
+  console.log(`Feathers server listening on port ${port}`);
+});
+```
+
+You can run this example by using `node example/app` and going to [localhost:3030/messages](http://localhost:3030/messages). You should see an empty array. That's because you don't have any Todos yet but you now have full CRUD for your new messages service.
+
+## Changelog
+
+__0.1.0__
+
+- Initial release.
+
+
+## License
+
+Copyright (c) 2016
+
+Licensed under the [MIT license](LICENSE).
+
+
+## Author
+
+[Marshall Thompson](https://github.com/marshallswain)
