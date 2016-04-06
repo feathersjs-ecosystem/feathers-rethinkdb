@@ -47,28 +47,40 @@ function create(done) {
   counter = 0;
   // Create the db if it doesn't exist.
   r.dbList().contains('feathers').do(databaseExists => r.branch( databaseExists, { created: 0 }, r.dbCreate('feathers'))).run()
-    .then(() => r.dbList().contains('test').do(databaseExists => r.branch( databaseExists, { created: 0 }, r.dbCreate('test'))).run())
+    .then(() => {
+      console.log('feathers DATABASE CREATED');
+      return r.dbList().contains('test').do(databaseExists => r.branch( databaseExists, { created: 0 }, r.dbCreate('test'))).run();
+    })
     // Create the todos table if it doesn't exist.
-    .then(() => r.db('feathers').tableList().contains('todos')
-      .do(function(tableExists) {
-        return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('todos') );
-      }).run()
+    .then(() => {
+      console.log('test DATABASE CREATED');
+      r.db('feathers').tableList().contains('todos')
+        .do(function(tableExists) {
+          return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('todos') );
+        }).run();
+      }
     )
-    .then(() => r.db('test').tableList().contains('todos')
-      .do(function(tableExists) {
-        return r.branch( tableExists, { created: 0 }, r.db('test').tableCreate('todos') );
-      }).run()
+    .then(() => {
+      console.log('feathers.todos TABLE CREATED.');
+      r.db('test').tableList().contains('todos')
+        .do(function(tableExists) {
+          return r.branch( tableExists, { created: 0 }, r.db('test').tableCreate('todos') );
+        }).run();
+      }
     )
     // Create the people table if it doesn't exist.
     .then(() => {
+      console.log('test.todos TABLE CREATED.');
       return r.db('feathers').tableList().contains('people')
         .do(function(tableExists) {
           return r.branch( tableExists, { created: 0 }, r.db('feathers').tableCreate('people') );
         }).run();
     })
     .then(() => {
+      console.log('DONE CREATING TABLES.');
       done();
-    });
+    })
+    .catch(err => console.log(err));
 }
 
 
