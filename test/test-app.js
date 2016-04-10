@@ -8,7 +8,7 @@ const r = rethink({
   db: 'feathers'
 });
 
-var counter = 0;
+let counter = 0;
 const todoService = service({
   Model: r,
   name: 'todos',
@@ -34,7 +34,7 @@ const todoService = service({
 });
 
 // Create a feathers instance.
-var app = feathers()
+let app = feathers()
   // Enable REST services
   .configure(rest())
   // Enable Socket.io services
