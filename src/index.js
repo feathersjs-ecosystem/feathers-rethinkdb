@@ -7,22 +7,22 @@ import parseQuery from './parse';
 class Service {
   constructor(options){
     if(!options){
-      throw new SyntaxError('RethinkDB options have to be provided.');
+      throw new Error('RethinkDB options have to be provided.');
     }
 
     if (options.Model) {
       options.r = options.Model;
     } else {
-      throw new SyntaxError('You must provide the RethinkDB object on options.Model');
+      throw new Error('You must provide the RethinkDB object on options.Model');
     }
 
     // Make sure the user connected a database before creating the service.
     if (!options.r._poolMaster._options.db) {
-      throw new SyntaxError('You must provide either an instance of r that is preconfigured with a db, or a provide options.db.');
+      throw new Error('You must provide either an instance of r that is preconfigured with a db, or a provide options.db.');
     }
 
     if (!options.name) {
-      throw new SyntaxError('You must provide a table name on options.name');
+      throw new Error('You must provide a table name on options.name');
     }
 
     this.type = 'rethinkdb';
@@ -30,6 +30,8 @@ class Service {
     this.table = options.r.table(options.name);
     this.options = options;
     this.paginate = options.paginate || {};
+
+    // this.table.changes().run().then(cursor => cursor.each(console.log));
   }
 
   extend(obj) {
@@ -37,216 +39,194 @@ class Service {
   }
 
   _find(params = {}) {
-    var r = this.options.r;
-    return new Promise((resolve, reject) => {
-      params.query = params.query || {};
+    let r = this.options.r;
 
-      // Start with finding all, and limit when necessary.
-      var query = this.table.filter({}),
-        // Prepare the special query params.
-        filters = filter(params.query, this.paginate);
+    params.query = params.query || {};
 
-      // Handle $select
-      if (filters.$select) {
-        query = query.pluck(filters.$select);
-      }
+    // Start with finding all, and limit when necessary.
+    let query = this.table.filter({});
+    // Prepare the special query params.
+    let filters = filter(params.query, this.paginate);
 
-      // Handle $sort
-      if (filters.$sort){
-        var fieldName = Object.keys(filters.$sort)[0];
-        if (filters.$sort[fieldName] === 1) {
-          query = query.orderBy(fieldName);
-        } else {
-          query = query.orderBy(r.desc(fieldName));
-        }
-      }
+    // Handle $select
+    if (filters.$select) {
+      query = query.pluck(filters.$select);
+    }
 
-      // Handle $or
-      // TODO (@marshallswain): Handle $or queries with nested specials.
-      // Right now they won't work and we'd need to start diving
-      // into nested where conditions.
-      if (params.query.$or) {
-        // orQuery will be built and passed to row('rowName').filter().
-        var orQuery;
-        // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
-        // Needs to become:
-        // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
-        params.query.$or.forEach((queryObject, i) => {
-          // queryObject looks like { name: 'Alice' }
-          var keys = Object.keys(queryObject);
-
-          keys.forEach(qField => {
-            // The queryObject's value: 'Alice'
-            let qValue = queryObject[qField];
-
-            // Build the subQuery based on the qField.
-            var subQuery;
-            // If the qValue is an object, it will have special params in it.
-            if (typeof qValue !== 'object') {
-              subQuery = r.row(qField).eq(qValue);
-            }
-
-            // At the end of the current set of attributes, determine placement.
-            if (i === 0) {
-              orQuery = subQuery;
-            } else {
-              orQuery = orQuery.or(subQuery);
-            }
-          });
-        });
-        query = query.filter(orQuery);
-        delete params.query.$or;
-      }
-      query = parseQuery(this, query, params.query);
-
-      var countQuery;
-
-      // For pagination, count has to run as a separate query, but without limit.
-      if (this.paginate.default) {
-        countQuery = query.count().run();
-      }
-
-      // Handle $skip AFTER the count query but BEFORE $limit.
-      if (filters.$skip){
-        query = query.skip(filters.$skip);
-      }
-      // Handle $limit AFTER the count query and $skip.
-      if (filters.$limit){
-        query = query.limit(filters.$limit);
-      }
-
-      // Execute the query
-      return Promise.all([query, countQuery]).then(responses => {
-        let data = responses[0];
-        // if (this.options.returnCursors) {
-        //   return callback(err, cursor);
-        // }
-        if (this.paginate.default) {
-          data = {
-            total: responses[1],
-            limit: filters.$limit,
-            skip: filters.$skip || 0,
-            data
-          };
-        }
-
-
-        return resolve(data);
-      })
-      .catch(err => reject(err));
-    });
-  }
-
-  find(params){
-    return this._find(params);
-  }
-
-  get(id, params) {
-    return new Promise((resolve, reject) => {
-      let query;
-      // If an id was passed, just get the record.
-      if (id !== null && id !== undefined) {
-        query = this.table.get(id);
-
-      // If no id was passed, use params.query
+    // Handle $sort
+    if (filters.$sort){
+      let fieldName = Object.keys(filters.$sort)[0];
+      if (filters.$sort[fieldName] === 1) {
+        query = query.orderBy(fieldName);
       } else {
-        params = params || {query:{}};
-        query = this.table.filter(params.query).limit(1);
+        query = query.orderBy(r.desc(fieldName));
+      }
+    }
+
+    // Handle $or
+    // TODO (@marshallswain): Handle $or queries with nested specials.
+    // Right now they won't work and we'd need to start diving
+    // into nested where conditions.
+    if (params.query.$or) {
+      // orQuery will be built and passed to row('rowName').filter().
+      let orQuery;
+      // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
+      // Needs to become:
+      // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
+      params.query.$or.forEach((queryObject, i) => {
+        // queryObject looks like { name: 'Alice' }
+        let keys = Object.keys(queryObject);
+
+        keys.forEach(qField => {
+          // The queryObject's value: 'Alice'
+          let qValue = queryObject[qField];
+
+          // Build the subQuery based on the qField.
+          let subQuery;
+          // If the qValue is an object, it will have special params in it.
+          if (typeof qValue !== 'object') {
+            subQuery = r.row(qField).eq(qValue);
+          }
+
+          // At the end of the current set of attributes, determine placement.
+          if (i === 0) {
+            orQuery = subQuery;
+          } else {
+            orQuery = orQuery.or(subQuery);
+          }
+        });
+      });
+      query = query.filter(orQuery);
+      delete params.query.$or;
+    }
+    query = parseQuery(this, query, params.query);
+
+    let countQuery;
+
+    // For pagination, count has to run as a separate query, but without limit.
+    if (this.paginate.default) {
+      countQuery = query.count().run();
+    }
+
+    // Handle $skip AFTER the count query but BEFORE $limit.
+    if (filters.$skip){
+      query = query.skip(filters.$skip);
+    }
+    // Handle $limit AFTER the count query and $skip.
+    if (filters.$limit){
+      query = query.limit(filters.$limit);
+    }
+
+    // Execute the query
+    return Promise.all([query, countQuery]).then( ([ data, total ]) => {
+      if (this.paginate.default) {
+        return {
+          total,
+          data,
+          limit: filters.$limit,
+          skip: filters.$skip || 0
+        };
       }
 
-      query.run()
-        .then(data => {
-          if (Array.isArray(data)) {
-            data = data[0];
-          }
-          if(!data) {
-            return reject(new errors.NotFound(`No record found for id '${id}'`));
-          }
-          return resolve(data);
-        })
-        .catch(reject);
+
+      return data;
     });
+  }
+
+  find(... args){
+    return this._find(... args);
+  }
+
+  _get(id, params) {
+    let query;
+    // If an id was passed, just get the record.
+    if (id !== null && id !== undefined) {
+      query = this.table.get(id);
+
+    // If no id was passed, use params.query
+    } else {
+      params = params || { query: {} };
+      query = this.table.filter(params.query).limit(1);
+    }
+
+    return query.run().then(data => {
+      if (Array.isArray(data)) {
+        data = data[0];
+      }
+      if(!data) {
+        throw new errors.NotFound(`No record found for id '${id}'`);
+      }
+      return data;
+    });
+  }
+
+  get(... args) {
+    return this._get(... args);
   }
 
   // STILL NEED TO ADD params argument here.
   create(data) {
-    return new Promise((resolve, reject) => {
-      this.table.insert(data).run()
-        .then(res => {
-          data.id = res.generated_keys[0];
-          return resolve(data);
-        })
-        .catch(reject);
-    });
+    return this.table.insert(data).run()
+      .then(res => Object.assign({ id: res.generated_keys[0] }, data));
   }
 
   patch(id, data, params) {
-    return new Promise((resolve, reject) => {
+    let query;
+
+    if (id !== null && id !== undefined) {
+      query = this._get(id);
+    } else if (params) {
+      query = this._find(params);
+    } else {
+      return Promise.reject(new Error('Patch requires an ID or params'));
+    }
+
+    // Find the original record(s), first, then patch them.
+    return query.then(getData => {
       let query;
-      if (id !== null && id !== undefined) {
-        query = this.get(id);
-      } else if (params) {
-        query = this.find(params);
+      if (Array.isArray(getData)) {
+        query = this.table.getAll(... getData.map(item => item.id));
       } else {
-        return reject(new Error('Patch requires an ID or params'));
+        query = this.table.get(id);
       }
-      // Find the original record(s), first, then patch them.
-      query.then(getData => {
-        let query;
-        if (Array.isArray(getData)) {
-          let ids = getData.map(item => item.id);
-          query = this.table.getAll(...ids);
-        } else {
-          query = this.table.get(id);
-        }
-        query.update(data, {returnChanges: true}).run()
-          .then(response => {
-            let changes = response.changes.map(change => change.new_val);
-            resolve(changes.length === 1 ? changes[0] : changes);
-          })
-          .catch(reject);
-      })
-      .catch(reject);
+
+      return query.update(data, {returnChanges: true}).run().then(response => {
+        let changes = response.changes.map(change => change.new_val);
+        return changes.length === 1 ? changes[0] : changes;
+      });
     });
   }
 
   update(id, data) {
-    return new Promise((resolve, reject) => {
-      // Find the original record, first, then update it.
-      this.get(id)
-        .then(getData => {
-          data.id = id;
-          this.table.get(getData.id).replace(data, {returnChanges: true}).run()
-            .then(result => resolve(result.changes[0].new_val))
-            .catch(reject);
-        })
-        .catch(reject);
-      });
+    return this._get(id).then(getData => {
+      data.id = id;
+
+      return this.table.get(getData.id)
+        .replace(data, {returnChanges: true}).run()
+        .then(result => result.changes[0].new_val);
+    });
   }
 
   remove(id, params) {
-    return new Promise((resolve, reject) => {
-      let query;
+    let query;
 
-      // You have to pass id=null to remove all records.
-      if (id !== null && id !== undefined) {
-        query = this.table.get(id);
-      } else if (id === null) {
-        const queryParams = Object.assign({}, params && params.query);
-        query = this.table.filter(queryParams);
+    // You have to pass id=null to remove all records.
+    if (id !== null && id !== undefined) {
+      query = this.table.get(id);
+    } else if (id === null) {
+      const queryParams = Object.assign({}, params && params.query);
+      query = this.table.filter(queryParams);
+    } else {
+      return Promise.reject(new Error('You must pass either an id or params to remove.'));
+    }
+
+    return query.delete({returnChanges: true}).run().then(res => {
+      if (res.changes && res.changes.length) {
+        let changes = res.changes.map(change => change.old_val);
+        return changes.length === 1 ? changes[0] : changes;
       } else {
-        return reject(new Error('You must pass either an id or params to remove.'));
+        return [];
       }
-      query.delete({returnChanges: true}).run()
-        .then(res => {
-          if (res.changes && res.changes.length) {
-            let changes = res.changes.map(change => change.old_val);
-            return resolve(changes.length === 1 ? changes[0] : changes);
-          } else {
-            return resolve([]);
-          }
-        })
-        .catch(reject);
     });
   }
 }

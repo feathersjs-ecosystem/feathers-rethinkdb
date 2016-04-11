@@ -3,10 +3,9 @@
  * Must be run after special query params are removed.
  */
 export default function parseQuery(service, reQuery, params){
-  let r = service.options.r,
-    theKeys = Object.keys(params);
+  let r = service.options.r;
 
-  theKeys.forEach(qField => {
+  Object.keys(params).forEach(qField => {
     let isFilter = false, subQuery;
     // The queryObject's value: 'Alice'
     var qValue = params[qField];

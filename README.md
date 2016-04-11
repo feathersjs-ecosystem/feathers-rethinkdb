@@ -1,5 +1,7 @@
 # feathers-rethinkdb
 
+[![Build Status](https://travis-ci.org/feathersjs/feathers-rethinkdb.svg?branch=master)](https://travis-ci.org/feathersjs/feathers-rethinkdb)
+
 > Create a [RethinkDB](https://rethinkdb.com/) Service for [FeatherJS](https://github.com/feathersjs).
 
 ## Installation
