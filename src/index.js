@@ -1,12 +1,13 @@
 import Proto from 'uberproto';
 import filter from 'feathers-query-filters';
-import { types as errors } from 'feathers-errors';
+import { types as errors }
+from 'feathers-errors';
 import parseQuery from './parse';
 
 // Create the service.
 class Service {
-  constructor(options){
-    if(!options){
+  constructor(options) {
+    if (!options) {
       throw new Error('RethinkDB options have to be provided.');
     }
 
@@ -30,8 +31,7 @@ class Service {
     this.table = options.r.table(options.name);
     this.options = options;
     this.paginate = options.paginate || {};
-
-    // this.table.changes().run().then(cursor => cursor.each(console.log));
+    this.events = ['created', 'updated', 'patched', 'removed'];
   }
 
   extend(obj) {
@@ -54,7 +54,7 @@ class Service {
     }
 
     // Handle $sort
-    if (filters.$sort){
+    if (filters.$sort) {
       let fieldName = Object.keys(filters.$sort)[0];
       if (filters.$sort[fieldName] === 1) {
         query = query.orderBy(fieldName);
@@ -96,6 +96,7 @@ class Service {
           }
         });
       });
+
       query = query.filter(orQuery);
       delete params.query.$or;
     }
@@ -109,32 +110,31 @@ class Service {
     }
 
     // Handle $skip AFTER the count query but BEFORE $limit.
-    if (filters.$skip){
+    if (filters.$skip) {
       query = query.skip(filters.$skip);
     }
     // Handle $limit AFTER the count query and $skip.
-    if (filters.$limit){
+    if (filters.$limit) {
       query = query.limit(filters.$limit);
     }
 
     // Execute the query
-    return Promise.all([query, countQuery]).then( ([ data, total ]) => {
+    return Promise.all([query, countQuery]).then(([data, total]) => {
       if (this.paginate.default) {
         return {
           total,
           data,
           limit: filters.$limit,
-          skip: filters.$skip || 0
+            skip: filters.$skip || 0
         };
       }
-
 
       return data;
     });
   }
 
-  find(... args){
-    return this._find(... args);
+  find(...args) {
+    return this._find(...args);
   }
 
   _get(id, params) {
@@ -143,9 +143,11 @@ class Service {
     if (id !== null && id !== undefined) {
       query = this.table.get(id);
 
-    // If no id was passed, use params.query
+      // If no id was passed, use params.query
     } else {
-      params = params || { query: {} };
+      params = params || {
+        query: {}
+      };
       query = this.table.filter(params.query).limit(1);
     }
 
@@ -153,21 +155,23 @@ class Service {
       if (Array.isArray(data)) {
         data = data[0];
       }
-      if(!data) {
+      if (!data) {
         throw new errors.NotFound(`No record found for id '${id}'`);
       }
       return data;
     });
   }
 
-  get(... args) {
-    return this._get(... args);
+  get(...args) {
+    return this._get(...args);
   }
 
   // STILL NEED TO ADD params argument here.
   create(data) {
     return this.table.insert(data).run()
-      .then(res => Object.assign({ id: res.generated_keys[0] }, data));
+      .then(res => Object.assign({
+        id: res.generated_keys[0]
+      }, data));
   }
 
   patch(id, data, params) {
@@ -185,12 +189,14 @@ class Service {
     return query.then(getData => {
       let query;
       if (Array.isArray(getData)) {
-        query = this.table.getAll(... getData.map(item => item.id));
+        query = this.table.getAll(...getData.map(item => item.id));
       } else {
         query = this.table.get(id);
       }
 
-      return query.update(data, {returnChanges: true}).run().then(response => {
+      return query.update(data, {
+        returnChanges: true
+      }).run().then(response => {
         let changes = response.changes.map(change => change.new_val);
         return changes.length === 1 ? changes[0] : changes;
       });
@@ -202,7 +208,9 @@ class Service {
       data.id = id;
 
       return this.table.get(getData.id)
-        .replace(data, {returnChanges: true}).run()
+        .replace(data, {
+          returnChanges: true
+        }).run()
         .then(result => result.changes[0].new_val);
     });
   }
@@ -220,13 +228,36 @@ class Service {
       return Promise.reject(new Error('You must pass either an id or params to remove.'));
     }
 
-    return query.delete({returnChanges: true}).run().then(res => {
+    return query.delete({
+      returnChanges: true
+    }).run().then(res => {
       if (res.changes && res.changes.length) {
         let changes = res.changes.map(change => change.old_val);
         return changes.length === 1 ? changes[0] : changes;
       } else {
         return [];
       }
+    });
+  }
+
+  setup() {
+    this._cursor = this.table.changes().run().then(cursor => {
+      cursor.each((error, data) => {
+        if (error || typeof this.emit !== 'function') {
+          return;
+        }
+
+        if (data.old_val === null) {
+          this.emit('created', data.new_val);
+        } else if (data.new_val === null) {
+          this.emit('removed', data.old_val);
+        } else {
+          this.emit('updated', data.new_val);
+          this.emit('patched', data.new_val);
+        }
+      });
+
+      return cursor;
     });
   }
 }

@@ -2,17 +2,18 @@
  * Pass in a query object to get a ReQL query
  * Must be run after special query params are removed.
  */
-export default function parseQuery(service, reQuery, params){
+export default function parseQuery(service, reQuery, params) {
   let r = service.options.r;
 
   Object.keys(params).forEach(qField => {
-    let isFilter = false, subQuery;
+    let isFilter = false;
+    let subQuery;
     // The queryObject's value: 'Alice'
-    var qValue = params[qField];
+    let qValue = params[qField];
 
     // If the qValue is an object, it will have special params in it.
     if (typeof qValue === 'object') {
-      switch(Object.keys(qValue)[0]){
+      switch (Object.keys(qValue)[0]) {
         /**
          *  name: { $in: ['Alice', 'Bob'] }
          *  becomes
@@ -56,7 +57,7 @@ export default function parseQuery(service, reQuery, params){
     // At the end of the current set of attributes, determine placement.
     if (subQuery) {
       reQuery = reQuery.filter(subQuery);
-    } else if(!isFilter) {
+    } else if (!isFilter) {
       reQuery = reQuery.and(subQuery);
     }
   });

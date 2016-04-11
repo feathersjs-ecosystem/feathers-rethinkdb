@@ -1,9 +1,11 @@
+'use strict';
+
 const rethink = require('rethinkdbdash');
 const feathers = require('feathers');
 const rest = require('feathers-rest');
 const socketio = require('feathers-socketio');
 const bodyParser = require('body-parser');
-const service = require('../lib').default;
+const service = require('../lib');
 const r = rethink({
   db: 'feathers'
 });
@@ -20,8 +22,10 @@ const todoService = service({
   _find(params) {
     params = params || {};
     params.query = params.query || {};
-    if(!params.query.$sort) {
-      params.query.$sort = { counter: 1 };
+    if (!params.query.$sort) {
+      params.query.$sort = {
+        counter: 1
+      };
     }
 
     return this._super(params);
@@ -42,9 +46,10 @@ let app = feathers()
   // Turn on JSON parser for REST services
   .use(bodyParser.json())
   // Turn on URL-encoded parser for REST services
-  .use(bodyParser.urlencoded({extended: true}))
+  .use(bodyParser.urlencoded({
+    extended: true
+  }))
   .use('/todos', todoService);
-
 
 // Start the server.
 const port = 3030;
