@@ -83,6 +83,12 @@ You can run this example by using `node example/app` and going to [localhost:303
 
 ## Changelog
 
+__0.2.0__
+
+- Some minor cleanup
+- Getting all tests passing
+- Adding support for change feeds
+
 __0.1.0__
 
 - Initial release.
