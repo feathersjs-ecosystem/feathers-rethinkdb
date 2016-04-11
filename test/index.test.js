@@ -5,7 +5,6 @@ import feathers from 'feathers';
 import errors from 'feathers-errors';
 import rethink from 'rethinkdbdash';
 import service from '../src';
-import server from './test-app';
 
 const r = rethink({
   db: 'feathers'
@@ -40,12 +39,9 @@ const app = feathers().use('/people', service({
 }));
 const people = app.service('people');
 
-app.setup();
-
 function clean(done) {
   r.table('people').delete(null).run()
     .then(() => r.table('todos').delete().run())
-    .then(() => r.db('test').table('todos').delete().run())
     .then(() => done())
     .catch(done);
 }
@@ -58,57 +54,38 @@ function create(done) {
         created: 0
       },
       r.dbCreate('feathers')))
-    .run().then(() => {
-      console.log('feathers DATABASE CREATED');
-      return r.dbList().contains('test').do(databaseExists => r.branch(databaseExists, {
-        created: 0
-      }, r.dbCreate('test'))).run();
-    })
+    .run()
     // Create the todos table if it doesn't exist.
     .then(() => {
-      console.log('test DATABASE CREATED');
-      r.db('feathers').tableList().contains('todos')
-        .do(function(tableExists) {
-          return r.branch(
-            tableExists, {
-              created: 0
-            },
-            r.db('feathers').tableCreate('todos')
-          );
-        }).run();
+      const table = r.db('feathers');
+
+      return Promise.all([
+        table.tableList().contains('todos')
+          .do(function(tableExists) {
+            return r.branch(
+              tableExists, {
+                created: 0
+              },
+              table.tableCreate('todos')
+            );
+          }).run(),
+        table.tableList().contains('people')
+          .do(function(tableExists) {
+            return r.branch(
+              tableExists, {
+                created: 0
+              },
+              table.tableCreate('people')
+            );
+          }).run()
+      ]);
     })
     .then(() => {
-      console.log('feathers.todos TABLE CREATED.');
-      r.db('test').tableList().contains('todos')
-        .do(function(tableExists) {
-          return r.branch(
-            tableExists, {
-              created: 0
-            },
-            r.db('test').tableCreate('todos')
-          );
-        }).run();
-    })
-    // Create the people table if it doesn't exist.
-    .then(() => {
-      console.log('test.todos TABLE CREATED.');
-      return r.db('feathers').tableList().contains('people')
-        .do(function(tableExists) {
-          return r.branch(
-            tableExists, {
-              created: 0
-            },
-            r.db('feathers').tableCreate('people')
-          );
-        }).run();
-    })
-    .then(() => {
-      console.log('DONE CREATING TABLES.');
+      app.setup();
       done();
     })
     .catch(done);
 }
-
 
 describe('feathers-rethinkdb', () => {
 
@@ -129,12 +106,7 @@ describe('feathers-rethinkdb', () => {
       });
   });
 
-  afterEach(done => {
-    people.remove(null).then(() => {
-        done();
-      })
-      .catch(done);
-  });
+  afterEach(done => people.remove(null).then(() => done()).catch(done));
 
   it('is CommonJS compatible', () => {
     expect(typeof require('../lib')).to.equal('function');
@@ -145,56 +117,59 @@ describe('feathers-rethinkdb', () => {
     done();
   });
 
+  describe('Changefeeds', () => {
+    it('`created` and `removed`', done => {
+      const table = r.db('feathers').table('people');
+
+      people.once('created', person => {
+        expect(person.name).to.equal('Marshall Thompson');
+        expect(person.counter).to.equal(counter);
+        table.get(person.id).delete().run();
+      });
+
+      people.once('removed', person => {
+        expect(person.name).to.equal('Marshall Thompson');
+        done();
+      });
+
+      table.insert({
+        name: 'Marshall Thompson',
+        counter: ++counter
+      }).run();
+    });
+
+    it('`patched` and `updated`', done => {
+      const table = r.db('feathers').table('people');
+
+      people.once('created', person => {
+        expect(person.name).to.equal('Marshall Thompson');
+        person.name = 'Marshall T.';
+        table.get(person.id).replace(person).run();
+      });
+
+      people.once('patched', person => expect(person.name).to.equal('Marshall T.'));
+
+      people.once('updated', person => {
+        expect(person.name).to.equal('Marshall T.');
+        table.get(person.id).delete().run();
+      });
+
+      people.once('removed', () => done());
+
+      table.insert({
+        name: 'Marshall Thompson',
+        counter: ++counter
+      }).run();
+    });
+  });
+
   base(people, _ids, errors.types);
 });
 
-describe('Changefeeds', () => {
-  it('`created` and `removed`', done => {
-    const table = r.db('feathers').table('people');
-
-    people.once('created', person => {
-      expect(person.name).to.equal('Marshall Thompson');
-      expect(person.counter).to.equal(counter);
-      table.get(person.id).delete().run();
-    });
-
-    people.once('removed', person => {
-      expect(person.name).to.equal('Marshall Thompson');
-      done();
-    });
-
-    table.insert({
-      name: 'Marshall Thompson',
-      counter: ++counter
-    }).run();
-  });
-
-  it('`patched` and `updated`', done => {
-    const table = r.db('feathers').table('people');
-
-    people.once('created', person => {
-      expect(person.name).to.equal('Marshall Thompson');
-      person.name = 'Marshall T.';
-      table.get(person.id).replace(person).run();
-    });
-
-    people.once('patched', person => expect(person.name).to.equal('Marshall T.'));
-
-    people.once('updated', person => {
-      expect(person.name).to.equal('Marshall T.');
-      table.get(person.id).delete().run();
-    });
-
-    people.once('removed', () => done());
-
-    table.insert({
-      name: 'Marshall Thompson',
-      counter: ++counter
-    }).run();
-  });
-});
-
 describe('RethinkDB service example test', () => {
+  let server;
+
+  before(() => server = require('../example/app'));
   after(done => server.close(() => done()));
 
   example('id');

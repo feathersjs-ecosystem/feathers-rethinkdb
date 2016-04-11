@@ -125,7 +125,7 @@ class Service {
           total,
           data,
           limit: filters.$limit,
-            skip: filters.$skip || 0
+          skip: filters.$skip || 0
         };
       }
 
