@@ -33,8 +33,8 @@ export default function parseQuery(service, reQuery, params) {
           break;
         case '$match': 
           isFilter = true; 
-          reQuery = reQuery.filter(function(doc){ 
-            return doc(qField).match(qValue.$regexp) 
+          reQuery = reQuery.filter(function(doc) { 
+            return doc(qField).match(qValue.$regexp);
           }); 
           break;
         case '$lt':
