@@ -19,7 +19,9 @@ Please refer to the [Feathers database adapter documentation](http://docs.feathe
 - [Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
 - [Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
 
-The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process.  It also provides some other benefits like connection pooling .
+The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process.  It also provides some other benefits like connection pooling.
+
+> Pro tip: For faster queries, create indexes on your table beforehand as described [here](https://www.rethinkdb.com/docs/secondary-indexes/javascript/).
 
 ## Complete Example
 
