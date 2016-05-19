@@ -209,7 +209,9 @@ class Service {
         .replace(data, {
           returnChanges: true
         }).run()
-        .then(result => (result.changes && result.changes.length) ? result.changes[0].new_val : {});
+        .then(result =>
+          (result.changes && result.changes.length) ? result.changes[0].new_val : data
+        );
     });
   }
 
