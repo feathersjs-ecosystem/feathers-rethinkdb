@@ -168,10 +168,19 @@ class Service {
 
   // STILL NEED TO ADD params argument here.
   create(data) {
-    return this.table.insert(data).run()
-      .then(res => Object.assign({
-        id: (data.id ? data.id : res.generated_keys[0])
-      }, data));
+    const idField = this.id;
+    return this.table.insert(data).run().then(function (res) {
+      if (data[idField]) {
+        if (res.errors) {
+          return Promise.reject(new errors.Conflict('Duplicate primary key'));
+        }
+        return data;
+      } else { // add generated id
+        const result = Object.assign({}, data);
+        result[idField] = res.generated_keys[0];
+        return result;
+      }
+    });
   }
 
   patch(id, data, params) {
@@ -189,7 +198,7 @@ class Service {
     return query.then(getData => {
       let query;
       if (Array.isArray(getData)) {
-        query = this.table.getAll(...getData.map(item => item.id));
+        query = this.table.getAll(...getData.map(item => item[this.id]));
       } else {
         query = this.table.get(id);
       }
@@ -204,8 +213,8 @@ class Service {
 
   update(id, data) {
     return this._get(id).then(getData => {
-      data.id = id;
-      return this.table.get(getData.id)
+      data[this.id] = id;
+      return this.table.get(getData[this.id])
         .replace(data, {
           returnChanges: true
         }).run()
