@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/feathersjs/feathers-rethinkdb/tree/HEAD)
-
-[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.1...HEAD)
+## [v0.2.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.2) (2016-07-23)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.1...v0.2.2)
 
 **Closed issues:**
 
