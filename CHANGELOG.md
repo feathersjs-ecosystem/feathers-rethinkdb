@@ -1,5 +1,17 @@
 # Change Log
 
+## [v0.2.3](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.3) (2016-08-25)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.2...v0.2.3)
+
+**Closed issues:**
+
+- Cannot read property '0' of undefined when creating multiple entries [\#33](https://github.com/feathersjs/feathers-rethinkdb/issues/33)
+
+**Merged pull requests:**
+
+- Set generated ids properly and only if available [\#34](https://github.com/feathersjs/feathers-rethinkdb/pull/34) ([daffl](https://github.com/daffl))
+- Update mocha to version 3.0.0 🚀 [\#32](https://github.com/feathersjs/feathers-rethinkdb/pull/32) ([greenkeeperio-bot](https://github.com/greenkeeperio-bot))
+
 ## [v0.2.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.2) (2016-07-23)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.1...v0.2.2)
 
