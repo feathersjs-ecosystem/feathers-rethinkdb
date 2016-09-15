@@ -1,29 +1,33 @@
-# feathers-rethinkdb
+feathers-rethinkdb
+==================
 
 [![Build Status](https://travis-ci.org/feathersjs/feathers-rethinkdb.svg?branch=master)](https://travis-ci.org/feathersjs/feathers-rethinkdb)
 
 > Create a [RethinkDB](https://rethinkdb.com/) Service for [FeatherJS](https://github.com/feathersjs).
 
-## Installation
+Installation
+------------
 
 ```bash
 npm install rethinkdbdash feathers-rethinkdb --save
 ```
 
-## Documentation
+Documentation
+-------------
 
 Please refer to the [Feathers database adapter documentation](http://docs.feathersjs.com/databases/readme.html) for more details or directly at:
 
-- [RethinkDB](http://docs.feathersjs.com/databases/rethinkdb.html) - The detailed documentation for this adapter
-- [Extending](http://docs.feathersjs.com/databases/extending.html) - How to extend a database adapter
-- [Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
-- [Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
+-	[RethinkDB](http://docs.feathersjs.com/databases/rethinkdb.html) - The detailed documentation for this adapter
+-	[Extending](http://docs.feathersjs.com/databases/extending.html) - How to extend a database adapter
+-	[Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
+-	[Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
 
-The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process.  It also provides some other benefits like connection pooling.
+The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process. It also provides some other benefits like connection pooling.
 
 > Pro tip: For faster queries, create indexes on your table beforehand as described [here](https://www.rethinkdb.com/docs/secondary-indexes/javascript/).
 
-## Complete Example
+Complete Example
+----------------
 
 Here's an example of a Feathers server with a `messages` RethinkDB service.
 
@@ -58,9 +62,9 @@ r.dbList().contains('feathers')
   // Create the table if it doesn't exist.
   .then(() => {
     return r.db('feathers').tableList().contains('messages')
-      .do(tableExists => r.branch( tableExists, {created: 0}, r.dbCreate('messages'))).run();
+      .do(tableExists => r.branch( tableExists, {created: 0}, r.tableCreate('messages'))).run();
   })
-		
+
   // Create and register a Feathers service.
   .then(() => {
     app.use('messages', service({
@@ -83,13 +87,14 @@ app.listen(port, function() {
 
 You can run this example by using `node example/app` and going to [localhost:3030/messages](http://localhost:3030/messages). You should see an empty array. That's because you don't have any Todos yet but you now have full CRUD for your new messages service.
 
-## License
+License
+-------
 
 Copyright (c) 2016
 
 Licensed under the [MIT license](LICENSE).
 
-## Author
+Author
+------
 
-[Marshall Thompson](https://github.com/marshallswain)
-[Contributors](https://github.com/feathersjs/feathers-rethinkdb/graphs/contributors)
+[Marshall Thompson](https://github.com/marshallswain)[Contributors](https://github.com/feathersjs/feathers-rethinkdb/graphs/contributors)
