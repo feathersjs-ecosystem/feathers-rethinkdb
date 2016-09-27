@@ -56,7 +56,7 @@ class Service {
     // Handle $sort
     if (filters.$sort) {
       let fieldName = Object.keys(filters.$sort)[0];
-      if (filters.$sort[fieldName] === 1) {
+      if (filters.$sort[fieldName] == 1) {
         q = q.orderBy(fieldName);
       } else {
         q = q.orderBy(r.desc(fieldName));
