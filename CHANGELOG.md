@@ -1,5 +1,29 @@
 # Change Log
 
+## [v0.2.8](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.8) (2016-09-27)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.7...v0.2.8)
+
+## [v0.2.7](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.7) (2016-09-27)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.6...v0.2.7)
+
+## [v0.2.6](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.6) (2016-09-27)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.5...v0.2.6)
+
+## [v0.2.5](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.5) (2016-09-27)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.4...v0.2.5)
+
+## [v0.2.4](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.4) (2016-09-27)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.3...v0.2.4)
+
+**Closed issues:**
+
+- Mention id option in documentation [\#35](https://github.com/feathersjs/feathers-rethinkdb/issues/35)
+
+**Merged pull requests:**
+
+- Accept string or integer `$sort` param [\#43](https://github.com/feathersjs/feathers-rethinkdb/pull/43) ([pkese](https://github.com/pkese))
+- Fix sample code to use tableCreate\(\) instead of another dbCreate\(\) [\#37](https://github.com/feathersjs/feathers-rethinkdb/pull/37) ([sjmcdowall](https://github.com/sjmcdowall))
+
 ## [v0.2.3](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.3) (2016-08-25)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.2...v0.2.3)
 
