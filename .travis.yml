@@ -6,7 +6,6 @@ node_js:
   - '4'
   - 'iojs' #end of life Jan. 2017
   - '0.12' #end of life Jan. 2017
-  - '0.10' #end of life Jan. 2017
 addons:
   code_climate:
     repo_token: '7923d082ec24c66c6e2b85339b00191a7701678418ec1b4cbbfb42b6110eab7a'
