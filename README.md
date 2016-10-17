@@ -1,7 +1,11 @@
 feathers-rethinkdb
 ==================
 
-[![Build Status](https://travis-ci.org/feathersjs/feathers-rethinkdb.svg?branch=master)](https://travis-ci.org/feathersjs/feathers-rethinkdb)
+[![Build Status](https://travis-ci.org/feathersjs/feathers-rethinkdb.png?branch=master)](https://travis-ci.org/feathersjs/feathers-rethinkdb)
+[![Code Climate](https://codeclimate.com/github/feathersjs/feathers-rethinkdb/badges/gpa.svg)](https://codeclimate.com/github/feathersjs/feathers-rethinkdb)
+[![Test Coverage](https://codeclimate.com/github/feathersjs/feathers-rethinkdb/badges/coverage.svg)](https://codeclimate.com/github/feathersjs/feathers-rethinkdb/coverage)
+[![Dependency Status](https://img.shields.io/david/feathersjs/feathers-rethinkdb.svg?style=flat-square)](https://david-dm.org/feathersjs/feathers-rethinkdb)
+[![Download Status](https://img.shields.io/npm/dm/feathers-rethinkdb.svg?style=flat-square)](https://www.npmjs.com/package/feathers-rethinkdb)
 
 > Create a [RethinkDB](https://rethinkdb.com/) Service for [FeatherJS](https://github.com/feathersjs).
 
