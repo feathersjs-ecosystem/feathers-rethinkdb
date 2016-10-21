@@ -11,7 +11,7 @@ const r = rethink({
 });
 
 r.db('feathers').tableList().contains('todos')
-  .do(function(tableExists) {
+  .do(function (tableExists) {
     return r.branch(
       tableExists, {
         created: 0
@@ -29,7 +29,7 @@ const todoService = service({
     max: 4
   }
 }).extend({
-  _find(params) {
+  _find (params) {
     params = params || {};
     params.query = params.query || {};
     if (!params.query.$sort) {
@@ -41,7 +41,7 @@ const todoService = service({
     return this._super(params);
   },
 
-  create(data, params) {
+  create (data, params) {
     data.counter = ++counter;
     return this._super(data, params);
   }

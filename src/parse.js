@@ -2,7 +2,7 @@
  * Pass in a query object to get a ReQL query
  * Must be run after special query params are removed.
  */
-export default function parseQuery(service, reQuery, params) {
+export default function parseQuery (service, reQuery, params) {
   let r = service.options.r;
 
   Object.keys(params).forEach(qField => {
@@ -21,21 +21,21 @@ export default function parseQuery(service, reQuery, params) {
          */
         case '$in':
           isFilter = true;
-          reQuery = reQuery.filter(function(doc) {
+          reQuery = reQuery.filter(function (doc) {
             return service.options.r.expr(qValue.$in).contains(doc(qField));
           });
           break;
         case '$nin':
           isFilter = true;
-          reQuery = reQuery.filter(function(doc) {
+          reQuery = reQuery.filter(function (doc) {
             return service.options.r.expr(qValue.$nin).contains(doc(qField)).not();
           });
           break;
-        case '$search': 
-          isFilter = true; 
-          reQuery = reQuery.filter(function(doc) { 
+        case '$search':
+          isFilter = true;
+          reQuery = reQuery.filter(function (doc) {
             return doc(qField).match(qValue.$regexp);
-          }); 
+          });
           break;
         case '$lt':
           subQuery = r.row(qField).lt(params[qField].$lt);
