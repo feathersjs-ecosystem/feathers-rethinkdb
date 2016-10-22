@@ -1,6 +1,8 @@
 import chai from 'chai';
-import { base, example }
-from 'feathers-service-tests';
+import {
+  base, example
+}
+  from 'feathers-service-tests';
 import feathers from 'feathers';
 import errors from 'feathers-errors';
 import rethink from 'rethinkdbdash';
@@ -21,7 +23,7 @@ const app = feathers().use('/people', service({
   name: 'people',
   watch: true
 }).extend({
-  _find(params) {
+  _find (params) {
     params = params || {};
     params.query = params.query || {};
     if (!params.query.$sort) {
@@ -33,12 +35,12 @@ const app = feathers().use('/people', service({
     return this._super(params);
   },
 
-  create(data, params) {
+  create (data, params) {
     const addCount = current => Object.assign({}, current, {
       counter: ++counter
     });
 
-    if(Array.isArray(data)) {
+    if (Array.isArray(data)) {
       data = data.map(addCount);
     } else {
       data = addCount(data);
@@ -49,21 +51,21 @@ const app = feathers().use('/people', service({
 }));
 const people = app.service('people');
 
-function clean(done) {
+function clean (done) {
   r.table('people').delete(null).run()
     .then(() => r.table('todos').delete().run())
     .then(() => done())
     .catch(done);
 }
 
-function create(done) {
+function create (done) {
   counter = 0;
   // Create the db if it doesn't exist.
   r.dbList().contains('feathers').do(databaseExists => r.branch(
-      databaseExists, {
-        created: 0
-      },
-      r.dbCreate('feathers')))
+    databaseExists, {
+      created: 0
+    },
+    r.dbCreate('feathers')))
     .run()
     // Create the todos table if it doesn't exist.
     .then(() => {
@@ -71,7 +73,7 @@ function create(done) {
 
       return Promise.all([
         table.tableList().contains('todos')
-          .do(function(tableExists) {
+          .do(function (tableExists) {
             return r.branch(
               tableExists, {
                 created: 0
@@ -80,7 +82,7 @@ function create(done) {
             );
           }).run(),
         table.tableList().contains('people')
-          .do(function(tableExists) {
+          .do(function (tableExists) {
             return r.branch(
               tableExists, {
                 created: 0
@@ -98,15 +100,14 @@ function create(done) {
 }
 
 describe('feathers-rethinkdb', () => {
-
   before(create);
   after(clean);
 
   beforeEach(done => {
     people.create({
-        name: 'Doug',
-        age: 32
-      }, {})
+      name: 'Doug',
+      age: 32
+    }, {})
       .then(data => {
         _ids.Doug = data.id;
         done();
@@ -173,9 +174,9 @@ describe('feathers-rethinkdb', () => {
     });
   });
 
-  describe('array creates', function() {
-    it('create works with an array', function(done) {
-      people.create([ { name: 'Test 1' }, { name: 'Test 2' }])
+  describe('array creates', function () {
+    it('create works with an array', function (done) {
+      people.create([{name: 'Test 1'}, {name: 'Test 2'}])
         .then(data => {
           expect(typeof data[0].id).to.not.equal('undefined');
           expect(typeof data[1].id).to.not.equal('undefined');
@@ -190,7 +191,7 @@ describe('feathers-rethinkdb', () => {
 describe('RethinkDB service example test', () => {
   let server;
 
-  before(() => server = require('../example/app'));
+  before(() => (server = require('../example/app')));
   after(done => server.close(() => done()));
 
   example('id');

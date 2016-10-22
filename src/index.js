@@ -6,7 +6,7 @@ import parseQuery from './parse';
 
 // Create the service.
 class Service {
-  constructor(options) {
+  constructor (options) {
     if (!options) {
       throw new Error('RethinkDB options have to be provided.');
     }
@@ -34,13 +34,12 @@ class Service {
     this.events = ['created', 'updated', 'patched', 'removed'];
   }
 
-  extend(obj) {
+  extend (obj) {
     return Proto.extend(obj, this);
   }
 
-  _find(params = {}) {
-    const paginate = typeof params.paginate !== 'undefined' ?
-      params.paginate : this.paginate;
+  _find (params = {}) {
+    const paginate = typeof params.paginate !== 'undefined' ? params.paginate : this.paginate;
 
     let r = this.options.r;
     // Start with finding all, and limit when necessary.
@@ -133,11 +132,11 @@ class Service {
     });
   }
 
-  find(...args) {
+  find (...args) {
     return this._find(...args);
   }
 
-  _get(id, params) {
+  _get (id, params) {
     let query;
     // If an id was passed, just get the record.
     if (id !== null && id !== undefined) {
@@ -162,12 +161,12 @@ class Service {
     });
   }
 
-  get(...args) {
+  get (...args) {
     return this._get(...args);
   }
 
   // STILL NEED TO ADD params argument here.
-  create(data) {
+  create (data) {
     const idField = this.id;
     return this.table.insert(data).run().then(function (res) {
       if (data[idField]) {
@@ -177,7 +176,7 @@ class Service {
         return data;
       } else { // add generated id
         const addId = (current, index) => {
-          if(res.generated_keys && res.generated_keys[index]){
+          if (res.generated_keys && res.generated_keys[index]) {
             return Object.assign({}, current, {
               [idField]: res.generated_keys[index]
             });
@@ -186,7 +185,7 @@ class Service {
           return current;
         };
 
-        if(Array.isArray(data)) {
+        if (Array.isArray(data)) {
           return data.map(addId);
         }
 
@@ -195,7 +194,7 @@ class Service {
     });
   }
 
-  patch(id, data, params) {
+  patch (id, data, params) {
     let query;
 
     if (id !== null && id !== undefined) {
@@ -223,7 +222,7 @@ class Service {
     });
   }
 
-  update(id, data) {
+  update (id, data) {
     return this._get(id).then(getData => {
       data[this.id] = id;
       return this.table.get(getData[this.id])
@@ -236,7 +235,7 @@ class Service {
     });
   }
 
-  remove(id, params) {
+  remove (id, params) {
     let query;
 
     // You have to pass id=null to remove all records.
@@ -261,7 +260,7 @@ class Service {
     });
   }
 
-  setup() {
+  setup () {
     this._cursor = this.table.changes().run().then(cursor => {
       cursor.each((error, data) => {
         if (error || typeof this.emit !== 'function') {
@@ -282,7 +281,7 @@ class Service {
   }
 }
 
-export default function init(options) {
+export default function init (options) {
   return new Service(options);
 }
 
