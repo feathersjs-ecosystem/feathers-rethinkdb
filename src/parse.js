@@ -1,71 +1,52 @@
-/**
- * Pass in a query object to get a ReQL query
- * Must be run after special query params are removed.
- */
-export default function parseQuery (service, reQuery, params) {
-  let r = service.options.r;
+import { _ } from 'feathers-commons';
 
-  Object.keys(params).forEach(qField => {
-    let isFilter = false;
-    let subQuery;
-    // The queryObject's value: 'Alice'
-    let qValue = params[qField];
+// Special parameter to RQL condition
+const mappings = {
+  $search: 'match',
+  $lt: 'lt',
+  $lte: 'le',
+  $gt: 'gt',
+  $gte: 'ge',
+  $ne: 'ne',
+  $eq: 'eq'
+};
 
-    // If the qValue is an object, it will have special params in it.
-    if (typeof qValue === 'object') {
-      switch (Object.keys(qValue)[0]) {
-        /**
-         *  name: { $in: ['Alice', 'Bob'] }
-         *  becomes
-         *  r.expr(['Alice', 'Bob']).contains(doc['name'])
-         */
-        case '$in':
-          isFilter = true;
-          reQuery = reQuery.filter(function (doc) {
-            return service.options.r.expr(qValue.$in).contains(doc(qField));
-          });
-          break;
-        case '$nin':
-          isFilter = true;
-          reQuery = reQuery.filter(function (doc) {
-            return service.options.r.expr(qValue.$nin).contains(doc(qField)).not();
-          });
-          break;
-        case '$search':
-          isFilter = true;
-          reQuery = reQuery.filter(function (doc) {
-            return doc(qField).match(qValue.$regexp);
-          });
-          break;
-        case '$lt':
-          subQuery = r.row(qField).lt(params[qField].$lt);
-          break;
-        case '$lte':
-          subQuery = r.row(qField).le(params[qField].$lte);
-          break;
-        case '$gt':
-          subQuery = r.row(qField).gt(params[qField].$gt);
-          break;
-        case '$gte':
-          subQuery = r.row(qField).ge(params[qField].$gte);
-          break;
-        case '$ne':
-          subQuery = r.row(qField).ne(params[qField].$ne);
-          break;
-        case '$eq':
-          subQuery = r.row(qField).eq(params[qField].$eq);
-          break;
+export function createFilter (query, r) {
+  return function (doc) {
+    const or = query.$or;
+    let matcher = r({});
+
+    // Handle $or. If it exists, use the first $or entry as the base matcher
+    if (Array.isArray(or)) {
+      matcher = createFilter(or[0], r)(doc);
+
+      for (let i = 0; i < or.length; i++) {
+        matcher = matcher.or(createFilter(or[i], r)(doc));
       }
-    } else {
-      subQuery = r.row(qField).eq(qValue);
     }
 
-    // At the end of the current set of attributes, determine placement.
-    if (subQuery) {
-      reQuery = reQuery.filter(subQuery);
-    } else if (!isFilter) {
-      reQuery = reQuery.and(subQuery);
-    }
-  });
-  return reQuery;
+    _.each(query, (value, field) => {
+      if (typeof value !== 'object') {
+        // Match value directly
+        matcher = matcher.and(doc(field).eq(value));
+      } else {
+        // Handle special parameters
+        _.each(value, (selector, type) => {
+          if (type === '$in') {
+            matcher = matcher.and(r.expr(selector).contains(doc(field)));
+          } else if (type === '$nin') {
+            matcher = matcher.and(
+              r.expr(selector).contains(doc(field)).not()
+            );
+          } else if (mappings[type]) {
+            const method = mappings[type];
+
+            matcher = matcher.and(doc(field)[method](selector));
+          }
+        });
+      }
+    });
+
+    return matcher;
+  };
 }

@@ -1,8 +1,5 @@
 import chai from 'chai';
-import {
-  base, example
-}
-  from 'feathers-service-tests';
+import { base, example } from 'feathers-service-tests';
 import feathers from 'feathers';
 import errors from 'feathers-errors';
 import rethink from 'rethinkdbdash';
@@ -17,12 +14,7 @@ const r = rethink({
 let counter = 0;
 
 const expect = chai.expect;
-const _ids = {};
-const app = feathers().use('/people', service({
-  Model: r,
-  name: 'people',
-  watch: true
-}).extend({
+const numberService = {
   _find (params) {
     params = params || {};
     params.query = params.query || {};
@@ -48,12 +40,28 @@ const app = feathers().use('/people', service({
 
     return this._super(data, params);
   }
-}));
+};
+
+const app = feathers()
+  .use('/people', service({
+    Model: r,
+    name: 'people',
+    watch: true,
+    events: [ 'testing' ]
+  }).extend(numberService))
+  .use('/people-customid', service({
+    id: 'customid',
+    Model: r,
+    name: 'people_customid',
+    watch: true,
+    events: [ 'testing' ]
+  }).extend(numberService));
 const people = app.service('people');
 
 function clean (done) {
   r.table('people').delete(null).run()
     .then(() => r.table('todos').delete().run())
+    .then(() => r.table('people_customid').delete().run())
     .then(() => done())
     .catch(done);
 }
@@ -81,6 +89,17 @@ function create (done) {
               table.tableCreate('todos')
             );
           }).run(),
+        table.tableList().contains('people_customid')
+          .do(function (tableExists) {
+            return r.branch(
+              tableExists, {
+                created: 0
+              },
+              table.tableCreate('people_customid', {
+                primaryKey: 'customid'
+              })
+            );
+          }).run(),
         table.tableList().contains('people')
           .do(function (tableExists) {
             return r.branch(
@@ -103,22 +122,6 @@ describe('feathers-rethinkdb', () => {
   before(create);
   after(clean);
 
-  beforeEach(done => {
-    people.create({
-      name: 'Doug',
-      age: 32
-    }, {})
-      .then(data => {
-        _ids.Doug = data.id;
-        done();
-      })
-      .catch(err => {
-        done(err);
-      });
-  });
-
-  afterEach(() => people.remove(null));
-
   it('is CommonJS compatible', () => {
     expect(typeof require('../lib')).to.equal('function');
   });
@@ -126,6 +129,11 @@ describe('feathers-rethinkdb', () => {
   it('basic functionality', done => {
     expect(typeof 1).to.equal('number');
     done();
+  });
+
+  describe('common tests', () => {
+    base(app, errors);
+    base(app, errors, 'people-customid', 'customid');
   });
 
   describe('Changefeeds', () => {
@@ -184,8 +192,6 @@ describe('feathers-rethinkdb', () => {
         });
     });
   });
-
-  base(people, _ids, errors.types);
 });
 
 describe('RethinkDB service example test', () => {
