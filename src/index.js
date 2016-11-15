@@ -1,8 +1,10 @@
 import Proto from 'uberproto';
 import filter from 'feathers-query-filters';
 import errors from 'feathers-errors';
-import omit from 'lodash.omit';
-import parseQuery from './parse';
+import { _, select } from 'feathers-commons';
+import { createFilter } from './parse';
+
+const BASE_EVENTS = ['created', 'updated', 'patched', 'removed'];
 
 // Create the service.
 class Service {
@@ -30,22 +32,22 @@ class Service {
     this.id = options.id || 'id';
     this.table = options.r.table(options.name);
     this.options = options;
+    this.watch = options.watch !== undefined ? options.watch : true;
     this.paginate = options.paginate || {};
-    this.events = ['created', 'updated', 'patched', 'removed'];
+    this.events = BASE_EVENTS.concat(options.events || []);
   }
 
   extend (obj) {
     return Proto.extend(obj, this);
   }
 
-  _find (params = {}) {
-    const paginate = typeof params.paginate !== 'undefined' ? params.paginate : this.paginate;
+  createFilter (query) {
+    return createFilter(query, this.options.r);
+  }
 
+  createQuery ({ filters, query }) {
     let r = this.options.r;
-    // Start with finding all, and limit when necessary.
-    let q = this.table.filter({});
-    // Prepare the special query params.
-    let { filters, query } = filter(params.query || {}, paginate);
+    let q = this.table.filter(this.createFilter(query));
 
     // Handle $select
     if (filters.$select) {
@@ -54,53 +56,24 @@ class Service {
 
     // Handle $sort
     if (filters.$sort) {
-      let fieldName = Object.keys(filters.$sort)[0];
-      if (parseInt(filters.$sort[fieldName]) === 1) {
-        q = q.orderBy(fieldName);
-      } else {
-        q = q.orderBy(r.desc(fieldName));
-      }
-    }
-
-    // Handle $or
-    // TODO (@marshallswain): Handle $or queries with nested specials.
-    // Right now they won't work and we'd need to start diving
-    // into nested where conditions.
-    if (query.$or) {
-      // orQuery will be built and passed to row('rowName').filter().
-      let orQuery;
-      // params.query.$or looks like [ { name: 'Alice' }, { name: 'Bob' } ]
-      // Needs to become:
-      // r.row("name").eq('Alice').or(r.row("name").eq('Bob'))
-      query.$or.forEach((queryObject, i) => {
-        // queryObject looks like { name: 'Alice' }
-        let keys = Object.keys(queryObject);
-
-        keys.forEach(qField => {
-          // The queryObject's value: 'Alice'
-          let qValue = queryObject[qField];
-
-          // Build the subQuery based on the qField.
-          let subQuery;
-          // If the qValue is an object, it will have special params in it.
-          if (typeof qValue !== 'object') {
-            subQuery = r.row(qField).eq(qValue);
-          }
-
-          // At the end of the current set of attributes, determine placement.
-          if (i === 0) {
-            orQuery = subQuery;
-          } else {
-            orQuery = orQuery.or(subQuery);
-          }
-        });
+      _.each(filters.$sort, (order, fieldName) => {
+        if (parseInt(order) === 1) {
+          q = q.orderBy(fieldName);
+        } else {
+          q = q.orderBy(r.desc(fieldName));
+        }
       });
-
-      q = q.filter(orQuery);
-      query = omit(query, '$or');
     }
-    q = parseQuery(this, q, query);
 
+    return q;
+  }
+
+  _find (params = {}) {
+    const paginate = typeof params.paginate !== 'undefined' ? params.paginate : this.paginate;
+    // Prepare the special query params.
+    const { filters, query } = filter(params.query || {}, paginate);
+
+    let q = params.rethinkdb || this.createQuery({ filters, query });
     let countQuery;
 
     // For pagination, count has to run as a separate query, but without limit.
@@ -113,7 +86,7 @@ class Service {
       q = q.skip(filters.$skip);
     }
     // Handle $limit AFTER the count query and $skip.
-    if (filters.$limit) {
+    if (typeof filters.$limit !== 'undefined') {
       q = q.limit(filters.$limit);
     }
 
@@ -136,18 +109,16 @@ class Service {
     return this._find(...args);
   }
 
-  _get (id, params) {
-    let query;
+  _get (id, params = {}) {
+    let query = this.table.filter(params.query).limit(1);
+
     // If an id was passed, just get the record.
     if (id !== null && id !== undefined) {
       query = this.table.get(id);
+    }
 
-      // If no id was passed, use params.query
-    } else {
-      params = params || {
-        query: {}
-      };
-      query = this.table.filter(params.query).limit(1);
+    if (params.query && params.query.$select) {
+      query = query.pluck(params.query.$select.concat(this.id));
     }
 
     return query.run().then(data => {
@@ -165,10 +136,9 @@ class Service {
     return this._get(...args);
   }
 
-  // STILL NEED TO ADD params argument here.
-  create (data) {
+  create (data, params) {
     const idField = this.id;
-    return this.table.insert(data).run().then(function (res) {
+    return this.table.insert(data).run().then(res => {
       if (data[idField]) {
         if (res.errors) {
           return Promise.reject(new errors.Conflict('Duplicate primary key', res.errors));
@@ -191,7 +161,7 @@ class Service {
 
         return addId(data, 0);
       }
-    });
+    }).then(select(params, this.id));
   }
 
   patch (id, data, params) {
@@ -208,31 +178,32 @@ class Service {
     // Find the original record(s), first, then patch them.
     return query.then(getData => {
       let query;
+
       if (Array.isArray(getData)) {
         query = this.table.getAll(...getData.map(item => item[this.id]));
       } else {
         query = this.table.get(id);
       }
+
       return query.update(data, {
         returnChanges: true
       }).run().then(response => {
         let changes = response.changes.map(change => change.new_val);
         return changes.length === 1 ? changes[0] : changes;
       });
-    });
+    }).then(select(params, this.id));
   }
 
-  update (id, data) {
+  update (id, data, params) {
     return this._get(id).then(getData => {
       data[this.id] = id;
       return this.table.get(getData[this.id])
         .replace(data, {
           returnChanges: true
-        }).run()
-        .then(result =>
+        }).run().then(result =>
           (result.changes && result.changes.length) ? result.changes[0].new_val : data
         );
-    });
+    }).then(select(params, this.id));
   }
 
   remove (id, params) {
@@ -242,42 +213,45 @@ class Service {
     if (id !== null && id !== undefined) {
       query = this.table.get(id);
     } else if (id === null) {
-      const queryParams = Object.assign({}, params && params.query);
-      query = this.table.filter(queryParams);
+      query = this.createQuery(filter(params.query || {}));
     } else {
       return Promise.reject(new Error('You must pass either an id or params to remove.'));
     }
 
     return query.delete({
       returnChanges: true
-    }).run().then(res => {
-      if (res.changes && res.changes.length) {
-        let changes = res.changes.map(change => change.old_val);
-        return changes.length === 1 ? changes[0] : changes;
-      } else {
-        return [];
-      }
-    });
+    })
+      .run()
+      .then(res => {
+        if (res.changes && res.changes.length) {
+          let changes = res.changes.map(change => change.old_val);
+          return changes.length === 1 ? changes[0] : changes;
+        } else {
+          return [];
+        }
+      }).then(select(params, this.id));
   }
 
   setup () {
-    this._cursor = this.table.changes().run().then(cursor => {
-      cursor.each((error, data) => {
-        if (error || typeof this.emit !== 'function') {
-          return;
-        }
-        if (data.old_val === null) {
-          this.emit('created', data.new_val);
-        } else if (data.new_val === null) {
-          this.emit('removed', data.old_val);
-        } else {
-          this.emit('updated', data.new_val);
-          this.emit('patched', data.new_val);
-        }
-      });
+    if (this.watch) {
+      this._cursor = this.table.changes().run().then(cursor => {
+        cursor.each((error, data) => {
+          if (error || typeof this.emit !== 'function') {
+            return;
+          }
+          if (data.old_val === null) {
+            this.emit('created', data.new_val);
+          } else if (data.new_val === null) {
+            this.emit('removed', data.old_val);
+          } else {
+            this.emit('updated', data.new_val);
+            this.emit('patched', data.new_val);
+          }
+        });
 
-      return cursor;
-    });
+        return cursor;
+      });
+    }
   }
 }
 
