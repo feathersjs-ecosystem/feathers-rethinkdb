@@ -1,5 +1,23 @@
 # Change Log
 
+## [v0.3.0](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.0) (2016-11-15)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.8...v0.3.0)
+
+**Closed issues:**
+
+- Boolean values [\#52](https://github.com/feathersjs/feathers-rethinkdb/issues/52)
+- Can't figure out how to get $in to work [\#48](https://github.com/feathersjs/feathers-rethinkdb/issues/48)
+- $sort doesn't seem to work as expected [\#47](https://github.com/feathersjs/feathers-rethinkdb/issues/47)
+- Travis tests running out of memory when starting RethinkDB server [\#41](https://github.com/feathersjs/feathers-rethinkdb/issues/41)
+- Make $or use the `parseQuery` function [\#5](https://github.com/feathersjs/feathers-rethinkdb/issues/5)
+- Create additional query tests. [\#3](https://github.com/feathersjs/feathers-rethinkdb/issues/3)
+
+**Merged pull requests:**
+
+- Update feathers-service-tests to version 0.9.0 🚀 [\#53](https://github.com/feathersjs/feathers-rethinkdb/pull/53) ([greenkeeperio-bot](https://github.com/greenkeeperio-bot))
+- jshint —\> semistandard [\#50](https://github.com/feathersjs/feathers-rethinkdb/pull/50) ([corymsmith](https://github.com/corymsmith))
+- adding code coverage [\#49](https://github.com/feathersjs/feathers-rethinkdb/pull/49) ([ekryski](https://github.com/ekryski))
+
 ## [v0.2.8](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.2.8) (2016-09-27)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.7...v0.2.8)
 
