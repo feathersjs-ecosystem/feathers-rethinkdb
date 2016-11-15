@@ -34,7 +34,7 @@ class Service {
     this.options = options;
     this.watch = options.watch !== undefined ? options.watch : true;
     this.paginate = options.paginate || {};
-    this.events = BASE_EVENTS.concat(options.events || []);
+    this.events = this.watch ? BASE_EVENTS.concat(options.events) : options.events || [];
   }
 
   extend (obj) {
