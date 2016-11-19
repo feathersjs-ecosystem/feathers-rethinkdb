@@ -149,6 +149,29 @@ describe('feathers-rethinkdb', () => {
         });
     });
   });
+
+  describe('$search', () => {
+    it('searches by RethinkDB match syntax', () => {
+      return people.create([{
+        name: 'Dave'
+      }, {
+        name: 'Ddave'
+      }, {
+        name: 'Eric'
+      }]).then(() => people.find({
+        query: { name: { $search: '^Da' } }
+      })).then(page => {
+        expect(page.length, 1);
+        expect(page[0].name).to.equal('Dave');
+      }).then(() => people.find({
+        query: { name: { $search: 've$' } }
+      })).then(page => {
+        expect(page.length, 2);
+        expect(page[0].name).to.equal('Dave');
+        expect(page[1].name).to.equal('Ddave');
+      });
+    });
+  });
 });
 
 describe('RethinkDB service example test', () => {
