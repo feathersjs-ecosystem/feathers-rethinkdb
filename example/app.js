@@ -10,16 +10,6 @@ const r = rethink({
   db: 'feathers'
 });
 
-r.db('feathers').tableList().contains('todos')
-  .do(function (tableExists) {
-    return r.branch(
-      tableExists, {
-        created: 0
-      },
-      r.db('feathers').tableCreate('todos')
-    );
-  }).run();
-
 let counter = 0;
 const todoService = service({
   Model: r,
@@ -58,11 +48,13 @@ let app = feathers()
   // Turn on URL-encoded parser for REST services
   .use(bodyParser.urlencoded({
     extended: true
-  }))
-  .use('/todos', todoService);
+  }));
 
-// Start the server.
-const port = 3030;
-
-// require('http').createServer();
-module.exports = app.listen(port);
+module.exports = todoService
+  .init()
+  .then(() => {
+    // mount the service
+    app.use('/todos', todoService);
+    // start the server
+    return app.listen(3030);
+  });

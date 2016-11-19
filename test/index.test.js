@@ -195,10 +195,29 @@ describe('feathers-rethinkdb', () => {
 });
 
 describe('RethinkDB service example test', () => {
-  let server;
-
-  before(() => (server = require('../example/app')));
-  after(done => server.close(() => done()));
+  before(done => {
+    let server = require('../example/app');
+    server.then((s) => {
+      after(done => s.close(() => done()));
+      done();
+    });
+  });
 
   example('id');
+});
+
+describe('init database', () => {
+  it('service.init() initializes the database', done => {
+    service({ Model: r, name: 'testTable' })
+      .init()
+      .then(() => {
+        expect(r.tableList().contains('testTable'));
+        r.table('testTable').delete(null).run()
+          .then(() => {
+            return done();
+          })
+          .catch(done);
+      })
+      .catch(done);
+  });
 });

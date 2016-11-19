@@ -59,35 +59,27 @@ var app = feathers()
   .use(bodyParser.json())
   // Turn on URL-encoded parser for REST services
   .use(bodyParser.urlencoded({extended: true}));
+  
+  var messages = service({
+    Model: r,
+    name: 'messages',
+    paginate: {
+      default: 10,
+      max: 50
+    }
+  }))
 
-// Create your database if it doesn't exist.
-r.dbList().contains('feathers')
-  .do(dbExists => r.branch(dbExists, {created: 0}, r.dbCreate('feathers'))).run()
-
-  // Create the table if it doesn't exist.
-  .then(() => {
-    return r.db('feathers').tableList().contains('messages')
-      .do(tableExists => r.branch( tableExists, {created: 0}, r.tableCreate('messages'))).run();
-  })
-
-  // Create and register a Feathers service.
-  .then(() => {
-    app.use('messages', service({
-      Model: r,
-      name: 'messages',
-      paginate: {
-        default: 10,
-        max: 50
-      }
-    }));
-  })
-  .catch(err => console.log(err));
-
-// Start the server.
-var port = 3030;
-app.listen(port, function() {
-  console.log(`Feathers server listening on port ${port}`);
-});
+  messages
+    .init()
+    .then(() => {
+      // mount the service
+      app.use('messages', messages);
+      // start the server.
+      const port = 3030;
+      app.listen(port, function() {
+        console.log(`Feathers server listening on port ${port}`);
+      });
+    })
 ```
 
 You can run this example by using `node example/app` and going to [localhost:3030/messages](http://localhost:3030/messages). You should see an empty array. That's because you don't have any Todos yet but you now have full CRUD for your new messages service.
