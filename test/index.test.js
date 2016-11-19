@@ -206,7 +206,7 @@ describe('RethinkDB service example test', () => {
 describe('init database', () => {
   it('service.init() initializes the database', done => {
     service({ Model: r, name: 'testTable' })
-      .init('testTable')
+      .init()
       .then(() => {
         expect(r.tableList().contains('testTable'));
         r.table('testTable')
