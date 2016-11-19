@@ -77,9 +77,8 @@ describe('feathers-rethinkdb', () => {
     expect(typeof require('../lib')).to.equal('function');
   });
 
-  it('basic functionality', done => {
+  it('basic functionality', () => {
     expect(typeof 1).to.equal('number');
-    done();
   });
 
   describe('common tests', () => {
@@ -133,42 +132,36 @@ describe('feathers-rethinkdb', () => {
     });
   });
 
-  describe('array creates', function () {
-    it('create works with an array', function (done) {
-      people.create([{name: 'Test 1'}, {name: 'Test 2'}])
+  describe('array creates', () => {
+    it('create works with an array', () => {
+      return people.create([{name: 'Test 1'}, {name: 'Test 2'}])
         .then(data => {
           expect(typeof data[0].id).to.not.equal('undefined');
           expect(typeof data[1].id).to.not.equal('undefined');
-          done();
         });
     });
   });
 });
 
 describe('RethinkDB service example test', () => {
-  before(done => {
-    let server = require('../example/app');
-    server.then((s) => {
-      after(done => s.close(() => done()));
-      done();
-    });
+  let server;
+
+  before(() => {
+    return (server = require('../example/app'));
   });
+
+  after(() => server.then(s => s.close()));
 
   example('id');
 });
 
 describe('init database', () => {
-  it('service.init() initializes the database', done => {
-    service({ Model: r, name: 'testTable' })
+  it('service.init() initializes the database', () => {
+    return service({ Model: r, name: 'testTable' })
       .init()
       .then(() => {
         expect(r.tableList().contains('testTable'));
-        r.table('testTable').delete(null).run()
-          .then(() => {
-            return done();
-          })
-          .catch(done);
-      })
-      .catch(done);
+        r.table('testTable').delete(null).run();
+      });
   });
 });
