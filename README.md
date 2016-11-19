@@ -74,8 +74,7 @@ var app = feathers()
     .then(() => {
       // mount the service
       app.use('messages', messages);
-
-      // Start the server.
+      // start the server.
       const port = 3030;
       app.listen(port, function() {
         console.log(`Feathers server listening on port ${port}`);
