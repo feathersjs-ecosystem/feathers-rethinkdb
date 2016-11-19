@@ -58,69 +58,20 @@ const app = feathers()
   }).extend(numberService));
 const people = app.service('people');
 
-function clean (done) {
-  r.table('people').delete(null).run()
-    .then(() => r.table('todos').delete().run())
-    .then(() => r.table('people_customid').delete().run())
-    .then(() => done())
-    .catch(done);
-}
-
-function create (done) {
-  counter = 0;
-  // Create the db if it doesn't exist.
-  r.dbList().contains('feathers').do(databaseExists => r.branch(
-    databaseExists, {
-      created: 0
-    },
-    r.dbCreate('feathers')))
-    .run()
-    // Create the todos table if it doesn't exist.
-    .then(() => {
-      const table = r.db('feathers');
-
-      return Promise.all([
-        table.tableList().contains('todos')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('todos')
-            );
-          }).run(),
-        table.tableList().contains('people_customid')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('people_customid', {
-                primaryKey: 'customid'
-              })
-            );
-          }).run(),
-        table.tableList().contains('people')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('people')
-            );
-          }).run()
-      ]);
-    })
-    .then(() => {
-      app.setup();
-      done();
-    })
-    .catch(done);
-}
-
 describe('feathers-rethinkdb', () => {
-  before(create);
-  after(clean);
+  before(() => {
+    return Promise.all([
+      app.service('people').init(),
+      app.service('people-customid').init()
+    ]).then(() => app.setup());
+  });
+  after(() => {
+    return Promise.all([
+      r.table('people').delete(null),
+      r.table('people_customid').delete(null),
+      r.table('todos').delete(null)
+    ]);
+  });
 
   it('is CommonJS compatible', () => {
     expect(typeof require('../lib')).to.equal('function');
