@@ -50,13 +50,11 @@ let app = feathers()
     extended: true
   }));
 
-module.exports = todoService.init()
+module.exports = todoService
+  .init()
   .then(() => {
     // mount the service
     app.use('/todos', todoService);
     // start the server
-    const port = 3030;
-    return app.listen(port, function () {
-      console.log(`Feathers server listening on port ${port}`);
-    });
+    return app.listen(3030);
   });
