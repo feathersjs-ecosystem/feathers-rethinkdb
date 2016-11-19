@@ -60,16 +60,24 @@ const people = app.service('people');
 
 describe('feathers-rethinkdb', () => {
   before(() => {
-    return Promise.all([
-      app.service('people').init(),
-      app.service('people-customid').init()
-    ]).then(() => app.setup());
+    return r.dbList().contains('feathers') // create db if not exists
+      .do(dbExists => r.branch(
+        dbExists,
+        { created: 0 },
+        r.dbCreate('feathers')
+      ))
+      .run().then(() => Promise.all([
+        app.service('people').init(),
+        app.service('people-customid').init({
+          primaryKey: 'customid'
+        })
+      ])).then(() => app.setup());
   });
+
   after(() => {
     return Promise.all([
       r.table('people').delete(null),
-      r.table('people_customid').delete(null),
-      r.table('todos').delete(null)
+      r.table('people_customid').delete(null)
     ]);
   });
 
@@ -150,7 +158,9 @@ describe('RethinkDB service example test', () => {
     return (server = require('../example/app'));
   });
 
-  after(() => server.then(s => s.close()));
+  after(() => server.then(s =>
+    r.table('todos').delete(null).then(() => s.close())
+  ));
 
   example('id');
 });

@@ -41,7 +41,7 @@ class Service {
     return Proto.extend(obj, this);
   }
 
-  init () {
+  init (opts = {}) {
     let r = this.options.r;
     let t = this.options.name;
     let db = this.options.r._poolMaster._options.db;
@@ -52,7 +52,7 @@ class Service {
         return r.db(db).tableList().contains(t) // create table if not exists
           .do(tableExists => r.branch(
             tableExists, {created: 0},
-            r.tableCreate(t))
+            r.tableCreate(t, opts))
           ).run();
       });
   }
