@@ -58,77 +58,35 @@ const app = feathers()
   }).extend(numberService));
 const people = app.service('people');
 
-function clean (done) {
-  r.table('people').delete(null).run()
-    .then(() => r.table('todos').delete().run())
-    .then(() => r.table('people_customid').delete().run())
-    .then(() => done())
-    .catch(done);
-}
-
-function create (done) {
-  counter = 0;
-  // Create the db if it doesn't exist.
-  r.dbList().contains('feathers').do(databaseExists => r.branch(
-    databaseExists, {
-      created: 0
-    },
-    r.dbCreate('feathers')))
-    .run()
-    // Create the todos table if it doesn't exist.
-    .then(() => {
-      const table = r.db('feathers');
-
-      return Promise.all([
-        table.tableList().contains('todos')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('todos')
-            );
-          }).run(),
-        table.tableList().contains('people_customid')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('people_customid', {
-                primaryKey: 'customid'
-              })
-            );
-          }).run(),
-        table.tableList().contains('people')
-          .do(function (tableExists) {
-            return r.branch(
-              tableExists, {
-                created: 0
-              },
-              table.tableCreate('people')
-            );
-          }).run()
-      ]);
-    })
-    .then(() => {
-      app.setup();
-      done();
-    })
-    .catch(done);
-}
-
 describe('feathers-rethinkdb', () => {
-  before(create);
-  after(clean);
+  before(() => {
+    return r.dbList().contains('feathers') // create db if not exists
+      .do(dbExists => r.branch(
+        dbExists,
+        { created: 0 },
+        r.dbCreate('feathers')
+      ))
+      .run().then(() => Promise.all([
+        app.service('people').init(),
+        app.service('people-customid').init({
+          primaryKey: 'customid'
+        })
+      ])).then(() => app.setup());
+  });
+
+  after(() => {
+    return Promise.all([
+      r.table('people').delete(null),
+      r.table('people_customid').delete(null)
+    ]);
+  });
 
   it('is CommonJS compatible', () => {
     expect(typeof require('../lib')).to.equal('function');
   });
 
-  it('basic functionality', done => {
+  it('basic functionality', () => {
     expect(typeof 1).to.equal('number');
-    done();
   });
 
   describe('common tests', () => {
@@ -182,42 +140,38 @@ describe('feathers-rethinkdb', () => {
     });
   });
 
-  describe('array creates', function () {
-    it('create works with an array', function (done) {
-      people.create([{name: 'Test 1'}, {name: 'Test 2'}])
+  describe('array creates', () => {
+    it('create works with an array', () => {
+      return people.create([{name: 'Test 1'}, {name: 'Test 2'}])
         .then(data => {
           expect(typeof data[0].id).to.not.equal('undefined');
           expect(typeof data[1].id).to.not.equal('undefined');
-          done();
         });
     });
   });
 });
 
 describe('RethinkDB service example test', () => {
-  before(done => {
-    let server = require('../example/app');
-    server.then((s) => {
-      after(done => s.close(() => done()));
-      done();
-    });
+  let server;
+
+  before(() => {
+    return (server = require('../example/app'));
   });
+
+  after(() => server.then(s =>
+    r.table('todos').delete(null).then(() => s.close())
+  ));
 
   example('id');
 });
 
 describe('init database', () => {
-  it('service.init() initializes the database', done => {
-    service({ Model: r, name: 'testTable' })
+  it('service.init() initializes the database', () => {
+    return service({ Model: r, name: 'testTable' })
       .init()
       .then(() => {
         expect(r.tableList().contains('testTable'));
-        r.table('testTable').delete(null).run()
-          .then(() => {
-            return done();
-          })
-          .catch(done);
-      })
-      .catch(done);
+        r.table('testTable').delete(null).run();
+      });
   });
 });
