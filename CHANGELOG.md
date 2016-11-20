@@ -1,5 +1,23 @@
 # Change Log
 
+## [v0.3.1](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.1) (2016-11-20)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.0...v0.3.1)
+
+**Closed issues:**
+
+- Add utility for creating a table [\#54](https://github.com/feathersjs/feathers-rethinkdb/issues/54)
+- $search not working - cannot convert `undefined` with r.expr\(\) [\#31](https://github.com/feathersjs/feathers-rethinkdb/issues/31)
+- Add test for $search [\#26](https://github.com/feathersjs/feathers-rethinkdb/issues/26)
+- Support cursors [\#13](https://github.com/feathersjs/feathers-rethinkdb/issues/13)
+- Create tests for returning cursors. [\#4](https://github.com/feathersjs/feathers-rethinkdb/issues/4)
+
+**Merged pull requests:**
+
+- $contains search in arrays [\#58](https://github.com/feathersjs/feathers-rethinkdb/pull/58) ([daffl](https://github.com/daffl))
+- Tests for $search [\#57](https://github.com/feathersjs/feathers-rethinkdb/pull/57) ([daffl](https://github.com/daffl))
+- Use .init to create test databases [\#56](https://github.com/feathersjs/feathers-rethinkdb/pull/56) ([daffl](https://github.com/daffl))
+- Initialize Database [\#55](https://github.com/feathersjs/feathers-rethinkdb/pull/55) ([slajax](https://github.com/slajax))
+
 ## [v0.3.0](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.0) (2016-11-15)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.2.8...v0.3.0)
 
