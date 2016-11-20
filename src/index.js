@@ -61,35 +61,37 @@ class Service {
     return createFilter(query, this.options.r);
   }
 
-  createQuery ({ filters, query }) {
+  createQuery (originalQuery) {
+    const { filters, query } = filter(originalQuery || {});
+
     let r = this.options.r;
-    let q = this.table.filter(this.createFilter(query));
+    let rq = this.table.filter(this.createFilter(query));
 
     // Handle $select
     if (filters.$select) {
-      q = q.pluck(filters.$select);
+      rq = rq.pluck(filters.$select);
     }
 
     // Handle $sort
     if (filters.$sort) {
       _.each(filters.$sort, (order, fieldName) => {
         if (parseInt(order) === 1) {
-          q = q.orderBy(fieldName);
+          rq = rq.orderBy(fieldName);
         } else {
-          q = q.orderBy(r.desc(fieldName));
+          rq = rq.orderBy(r.desc(fieldName));
         }
       });
     }
 
-    return q;
+    return rq;
   }
 
   _find (params = {}) {
     const paginate = typeof params.paginate !== 'undefined' ? params.paginate : this.paginate;
     // Prepare the special query params.
-    const { filters, query } = filter(params.query || {}, paginate);
+    const { filters } = filter(params.query || {}, paginate);
 
-    let q = params.rethinkdb || this.createQuery({ filters, query });
+    let q = params.rethinkdb || this.createQuery(params.query);
     let countQuery;
 
     // For pagination, count has to run as a separate query, but without limit.
@@ -229,7 +231,7 @@ class Service {
     if (id !== null && id !== undefined) {
       query = this.table.get(id);
     } else if (id === null) {
-      query = this.createQuery(filter(params.query || {}));
+      query = this.createQuery(params.query);
     } else {
       return Promise.reject(new Error('You must pass either an id or params to remove.'));
     }
