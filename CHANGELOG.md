@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.3.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.2) (2016-11-20)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.1...v0.3.2)
+
+**Merged pull requests:**
+
+- Update createQuery signature [\#59](https://github.com/feathersjs/feathers-rethinkdb/pull/59) ([daffl](https://github.com/daffl))
+
 ## [v0.3.1](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.1) (2016-11-20)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.0...v0.3.1)
 
