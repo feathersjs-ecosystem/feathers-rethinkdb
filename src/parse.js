@@ -3,6 +3,7 @@ import { _ } from 'feathers-commons';
 // Special parameter to RQL condition
 const mappings = {
   $search: 'match',
+  $contains: 'contains',
   $lt: 'lt',
   $lte: 'le',
   $gt: 'gt',

@@ -150,8 +150,8 @@ describe('feathers-rethinkdb', () => {
     });
   });
 
-  describe('$search', () => {
-    it('searches by RethinkDB match syntax', () => {
+  describe('additional query parameters', () => {
+    it('$search', () => {
       return people.create([{
         name: 'Dave'
       }, {
@@ -169,6 +169,27 @@ describe('feathers-rethinkdb', () => {
         expect(page.length, 2);
         expect(page[0].name).to.equal('Dave');
         expect(page[1].name).to.equal('Ddave');
+      });
+    });
+
+    it('$contains', () => {
+      return people.create([{
+        name: 'David',
+        nickNames: ['Dave', 'David', 'Feathers guy']
+      }, {
+        name: 'Eric',
+        nickNames: ['Eric', 'E', 'Feathers guy']
+      }]).then(() => people.find({
+        query: { nickNames: { $contains: 'Dave' } }
+      })).then(page => {
+        expect(page.length, 1);
+        expect(page[0].name).to.equal('David');
+      }).then(() => people.find({
+        query: { nickNames: { $contains: 'Feathers guy' } }
+      })).then(page => {
+        expect(page.length, 2);
+        expect(page[0].name).to.equal('David');
+        expect(page[1].name).to.equal('Eric');
       });
     });
   });
