@@ -76,7 +76,7 @@ describe('feathers-rethinkdb', () => {
 
   after(() => {
     return Promise.all([
-      // r.table('people').delete(null),
+      r.table('people').delete(null),
       r.table('people_customid').delete(null)
     ]);
   });
@@ -188,8 +188,8 @@ describe('feathers-rethinkdb', () => {
         query: { nickNames: { $contains: 'Feathers guy' } }
       })).then(page => {
         expect(page.length, 2);
-        // expect(page[0].name).to.equal('David');
-        // expect(page[1].name).to.equal('Eric');
+        expect(page[0].name).to.equal('David');
+        expect(page[1].name).to.equal('Eric');
       });
     });
 
