@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.3.3](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.3) (2016-12-21)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.2...v0.3.3)
+
+**Closed issues:**
+
+- Query with $and condition? [\#62](https://github.com/feathersjs/feathers-rethinkdb/issues/62)
+- Hangs creating pool on Windows [\#61](https://github.com/feathersjs/feathers-rethinkdb/issues/61)
+- Missing real-time changefeed documentation [\#21](https://github.com/feathersjs/feathers-rethinkdb/issues/21)
+
+**Merged pull requests:**
+
+- Add $and param \(related with \#62\) [\#64](https://github.com/feathersjs/feathers-rethinkdb/pull/64) ([JZiebikiewicz](https://github.com/JZiebikiewicz))
+
 ## [v0.3.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.2) (2016-11-20)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.1...v0.3.2)
 
