@@ -1,5 +1,16 @@
 # Change Log
 
+## [v0.3.4](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.4) (2017-02-04)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.3...v0.3.4)
+
+**Closed issues:**
+
+- Doesn't create database or tables [\#66](https://github.com/feathersjs/feathers-rethinkdb/issues/66)
+
+**Merged pull requests:**
+
+- Added missing params argument in calling \_get method [\#67](https://github.com/feathersjs/feathers-rethinkdb/pull/67) ([tarraso](https://github.com/tarraso))
+
 ## [v0.3.3](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.3) (2016-12-21)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.2...v0.3.3)
 
