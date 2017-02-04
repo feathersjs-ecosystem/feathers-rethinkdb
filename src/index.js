@@ -213,6 +213,10 @@ class Service {
   }
 
   update (id, data, params) {
+    if (Array.isArray(data) || id === null) {
+      return Promise.reject('Not replacing multiple records. Did you mean `patch`?');
+    }
+
     return this._get(id, params).then(getData => {
       data[this.id] = id;
       return this.table.get(getData[this.id])
