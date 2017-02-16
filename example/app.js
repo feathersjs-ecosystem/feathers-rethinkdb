@@ -5,7 +5,7 @@ const feathers = require('feathers');
 const rest = require('feathers-rest');
 const socketio = require('feathers-socketio');
 const bodyParser = require('body-parser');
-const service = require('../lib');
+const service = require('feathers-rethinkdb');
 const r = rethink({
   db: 'feathers'
 });
