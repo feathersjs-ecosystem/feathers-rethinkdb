@@ -1,5 +1,17 @@
 # Change Log
 
+## [v0.3.5](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.5) (2017-02-18)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.4...v0.3.5)
+
+**Closed issues:**
+
+- Where is ../lib?? [\#69](https://github.com/feathersjs/feathers-rethinkdb/issues/69)
+
+**Merged pull requests:**
+
+- Fix example test and add test for params.rethinkdb [\#70](https://github.com/feathersjs/feathers-rethinkdb/pull/70) ([daffl](https://github.com/daffl))
+- Add params.rethinkdb to pass driver options [\#68](https://github.com/feathersjs/feathers-rethinkdb/pull/68) ([patrykwegrzyn](https://github.com/patrykwegrzyn))
+
 ## [v0.3.4](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.4) (2017-02-04)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.3...v0.3.4)
 
