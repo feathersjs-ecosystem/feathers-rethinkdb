@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.3.6](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.6) (2017-03-02)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.5...v0.3.6)
+
+**Merged pull requests:**
+
+- Support db as service option [\#73](https://github.com/feathersjs/feathers-rethinkdb/pull/73) ([genyded](https://github.com/genyded))
+- Use Travis CI RethinkDB addon [\#71](https://github.com/feathersjs/feathers-rethinkdb/pull/71) ([daffl](https://github.com/daffl))
+
 ## [v0.3.5](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.5) (2017-02-18)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.4...v0.3.5)
 
