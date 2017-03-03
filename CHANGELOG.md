@@ -1,5 +1,16 @@
 # Change Log
 
+## [v0.3.7](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.7) (2017-03-03)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.6...v0.3.7)
+
+**Closed issues:**
+
+- Incorrect error message and/or lack of support for DB toggling/changing [\#72](https://github.com/feathersjs/feathers-rethinkdb/issues/72)
+
+**Merged pull requests:**
+
+- Fix and cleanup from previous check in [\#74](https://github.com/feathersjs/feathers-rethinkdb/pull/74) ([genyded](https://github.com/genyded))
+
 ## [v0.3.6](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.6) (2017-03-02)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.5...v0.3.6)
 
