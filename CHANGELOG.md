@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.4.1](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.1) (2017-03-26)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.0...v0.4.1)
+
+**Merged pull requests:**
+
+- Remove provider for hooks in changefeed events [\#77](https://github.com/feathersjs/feathers-rethinkdb/pull/77) ([daffl](https://github.com/daffl))
+
 ## [v0.4.0](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.0) (2017-03-26)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.7...v0.4.0)
 
