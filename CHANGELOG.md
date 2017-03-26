@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.4.0](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.0) (2017-03-26)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.7...v0.4.0)
+
+**Merged pull requests:**
+
+- Allow changefeed event data to be processed by `after` hooks [\#75](https://github.com/feathersjs/feathers-rethinkdb/pull/75) ([daffl](https://github.com/daffl))
+
 ## [v0.3.7](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.3.7) (2017-03-03)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.3.6...v0.3.7)
 
