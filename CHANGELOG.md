@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.4.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.2) (2017-04-15)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.1...v0.4.2)
+
+**Merged pull requests:**
+
+- Sets default value for "params" in service method signatures [\#82](https://github.com/feathersjs/feathers-rethinkdb/pull/82) ([tjramage](https://github.com/tjramage))
+- Update dependencies to enable Greenkeeper 🌴 [\#79](https://github.com/feathersjs/feathers-rethinkdb/pull/79) ([greenkeeper[bot]](https://github.com/integration/greenkeeper))
+
 ## [v0.4.1](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.1) (2017-03-26)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.0...v0.4.1)
 
