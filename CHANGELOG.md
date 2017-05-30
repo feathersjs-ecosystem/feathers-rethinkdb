@@ -1,12 +1,29 @@
 # Change Log
 
+## [v0.4.3](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.3) (2017-05-30)
+[Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.2...v0.4.3)
+
+**Closed issues:**
+
+- Set default value in patch/update for "params" parameter [\#81](https://github.com/feathersjs/feathers-rethinkdb/issues/81)
+
+**Merged pull requests:**
+
+- Update chai to the latest version 🚀 [\#92](https://github.com/feathersjs/feathers-rethinkdb/pull/92) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Added support for nested document structures [\#91](https://github.com/feathersjs/feathers-rethinkdb/pull/91) ([jpeffer](https://github.com/jpeffer))
+- Update feathers-socketio to the latest version 🚀 [\#90](https://github.com/feathersjs/feathers-rethinkdb/pull/90) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update feathers-service-tests to the latest version 🚀 [\#88](https://github.com/feathersjs/feathers-rethinkdb/pull/88) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update feathers-hooks to the latest version 🚀 [\#87](https://github.com/feathersjs/feathers-rethinkdb/pull/87) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update semistandard to the latest version 🚀 [\#86](https://github.com/feathersjs/feathers-rethinkdb/pull/86) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update feathers-hooks to the latest version 🚀 [\#83](https://github.com/feathersjs/feathers-rethinkdb/pull/83) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+
 ## [v0.4.2](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.2) (2017-04-15)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.1...v0.4.2)
 
 **Merged pull requests:**
 
 - Sets default value for "params" in service method signatures [\#82](https://github.com/feathersjs/feathers-rethinkdb/pull/82) ([tjramage](https://github.com/tjramage))
-- Update dependencies to enable Greenkeeper 🌴 [\#79](https://github.com/feathersjs/feathers-rethinkdb/pull/79) ([greenkeeper[bot]](https://github.com/integration/greenkeeper))
+- Update dependencies to enable Greenkeeper 🌴 [\#79](https://github.com/feathersjs/feathers-rethinkdb/pull/79) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
 
 ## [v0.4.1](https://github.com/feathersjs/feathers-rethinkdb/tree/v0.4.1) (2017-03-26)
 [Full Changelog](https://github.com/feathersjs/feathers-rethinkdb/compare/v0.4.0...v0.4.1)
