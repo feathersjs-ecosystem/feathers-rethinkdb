@@ -22,12 +22,12 @@ npm install rethinkdbdash feathers-rethinkdb --save
 Documentation
 -------------
 
-Please refer to the [Feathers database adapter documentation](http://docs.feathersjs.com/databases/readme.html) for more details or directly at:
+Please refer to the [Feathers database adapter documentation](https://docs.feathersjs.com/api/databases/common.html) for more details or directly at:
 
--	[RethinkDB](http://docs.feathersjs.com/databases/rethinkdb.html) - The detailed documentation for this adapter
--	[Extending](http://docs.feathersjs.com/databases/extending.html) - How to extend a database adapter
--	[Pagination and Sorting](http://docs.feathersjs.com/databases/pagination.html) - How to use pagination and sorting for the database adapter
--	[Querying](http://docs.feathersjs.com/databases/querying.html) - The common adapter querying mechanism
+-	[RethinkDB](http://docs.feathersjs.com/api/databases/rethinkdb.html) - The detailed documentation for this adapter
+- [Extending](https://docs.feathersjs.com/api/databases/common.html#extending-adapters) - How to extend a database adapter
+- [Pagination](https://docs.feathersjs.com/api/databases/common.html#pagination) - How to use pagination
+- [Querying and Sorting](https://docs.feathersjs.com/api/databases/querying.html) - The common adapter querying mechanism and sorting for the database adapter
 
 The `feathers-rethinkdb` adapter is built to use [`rethinkdbdash`](https://github.com/neumino/rethinkdbdash), which is a progressive version of the RethinkDB node driver which simplifies the connection process. It also provides some other benefits like connection pooling.
 
