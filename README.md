@@ -5,7 +5,6 @@
 [![Build Status](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb.png?branch=master)](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb)
 [![Dependency Status](https://img.shields.io/david/feathersjs-ecosystem/feathers-rethinkdb.svg?style=flat-square)](https://david-dm.org/feathersjs-ecosystem/feathers-rethinkdb)
 [![Download Status](https://img.shields.io/npm/dm/feathers-rethinkdb.svg?style=flat-square)](https://www.npmjs.com/package/feathers-rethinkdb)
-[![Slack Status](http://slack.feathersjs.com/badge.svg)](http://slack.feathersjs.com)
 
 [feathers-rethinkdb](https://github.com/feathersjs-ecosystem/feathers-rethinkdb) is a database adapter for [RethinkDB](https://rethinkdb.com), a real-time database.
 
@@ -13,7 +12,7 @@
 $ npm install --save rethinkdbdash feathers-rethinkdb
 ```
 
-> __Important:__ `feathers-rethinkdb` implements the [Feathers Common database adapter API](https://docs.feathersjs.com/api/databases/common.html) and [querying syntax](https://docs.feathersjs.com/api/databases/common.html).
+> __Important:__ `feathers-rethinkdb` implements the [Feathers Common database adapter API](https://docs.feathersjs.com/api/databases/common.html) and [querying syntax](https://docs.feathersjs.com/api/databases/querying.html).
 
 > This adapter requires a running [RethinkDB](https://www.rethinkdb.com/) server.
 
