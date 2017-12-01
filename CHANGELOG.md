@@ -1,5 +1,24 @@
 # Change Log
 
+## [v0.5.0](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.0) (2017-12-01)
+[Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.4.3...v0.5.0)
+
+**Closed issues:**
+
+- FeathersJS REST Multiple Query String [\#100](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/100)
+- Hello how find record with param orderby ?  [\#99](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/99)
+- An in-range update of feathers-hooks is breaking the build 🚨 [\#95](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/95)
+- Support searching against nested fields using dot notation [\#89](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/89)
+
+**Merged pull requests:**
+
+- Update to Feathers Buzzard \(v3\) [\#104](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/104) ([daffl](https://github.com/daffl))
+- Update to new plugin infrastructure [\#103](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/103) ([daffl](https://github.com/daffl))
+- Update mocha to the latest version 🚀 [\#101](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/101) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update debug to the latest version 🚀 [\#98](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/98) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update debug to the latest version 🚀 [\#97](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/97) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update feathers-hooks to the latest version 🚀 [\#94](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/94) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+
 ## [v0.4.3](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.4.3) (2017-05-30)
 [Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.4.2...v0.4.3)
 
