@@ -3,8 +3,6 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/feathersjs-ecosystem/feathers-rethinkdb.svg)](https://greenkeeper.io/)
 
 [![Build Status](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb.png?branch=master)](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb)
-[![Code Climate](https://codeclimate.com/github/feathersjs-ecosystem/feathers-rethinkdb/badges/gpa.svg)](https://codeclimate.com/github/feathersjs-ecosystem/feathers-rethinkdb)
-[![Test Coverage](https://codeclimate.com/github/feathersjs-ecosystem/feathers-rethinkdb/badges/coverage.svg)](https://codeclimate.com/github/feathersjs-ecosystem/feathers-rethinkdb/coverage)
 [![Dependency Status](https://img.shields.io/david/feathersjs-ecosystem/feathers-rethinkdb.svg?style=flat-square)](https://david-dm.org/feathersjs-ecosystem/feathers-rethinkdb)
 [![Download Status](https://img.shields.io/npm/dm/feathers-rethinkdb.svg?style=flat-square)](https://www.npmjs.com/package/feathers-rethinkdb)
 [![Slack Status](http://slack.feathersjs.com/badge.svg)](http://slack.feathersjs.com)

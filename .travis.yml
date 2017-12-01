@@ -5,14 +5,3 @@ node_js:
   - '6'
 addons:
   rethinkdb: 2.3
-  code_climate:
-    repo_token: 7923d082ec24c66c6e2b85339b00191a7701678418ec1b4cbbfb42b6110eab7a
-before_script:
-  - 'npm install -g codeclimate-test-reporter'
-after_script:
-  - 'codeclimate-test-reporter < coverage/lcov.info'
-notifications:
-  email: false
-  slack:
-    rooms:
-      secure: kR4vag7Wof2a2FmneqhM02LoNzI2NQcqNU9niCBw0HQmG++KE6yC9DhN90z/Ryc6mXIOfvuknJNmMz6qB46q38arOdC3n5kAAVH3XdrSDTVZAr5UxuYXiXZxeBQ2RRBjG3xjGrsSmiJwQc+sXgqtSVrL6r35Eose5OKD9L7i2UbI8Y6w7uty2tJ09evkkEzIiiE4IpMZq6Z1H/w3pt/pSyakFo4VwXxDDRn0CgUAD3K/ktzzkpJtbJqVv/17irR73dWRRu/Hxd2r8pMBb+EQ8xVOdeze6mjInwR3tv8L+cA+CS3qXTjVI/dlWs7tPn7dm5e1FkJ8wsISvx1USfyv1a2i9oUiLG9Be//wH1JOG2HtIE1CKd3/qhcloneH4yn+lQTpQywV3leT4vJuRJHPb0J4FD56rM/NVWW+0l+4/zCQ9gZePas0Jbla010oJCfPhdjrnhekNlJvvy2JXEl/PSdi9KiA8p+z6+qMTe7hSlPt+WI5rQdThcudhNIzcar6aj5VCWZEFSKUtYjS9pgfzGad5p3j8L2qFD9rdmAsrQDr9T2c574BnCgPGWwTPpW06TzON2byZBClLMZ5wI/JWhPpC83LlAIy5gX6FFI0OtfuQ3esIWcgDELZcvLcfxaOx6HToQZzXA9FzrQMdhPt3oCDpnfXYDthq2o62aZdqqI=
