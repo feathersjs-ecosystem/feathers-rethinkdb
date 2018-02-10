@@ -1,5 +1,20 @@
 # Change Log
 
+## [v0.5.1](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.1) (2018-02-10)
+[Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.5.0...v0.5.1)
+
+**Closed issues:**
+
+- Querying for numeric equality [\#105](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/105)
+-  Expected type TABLE but found SELECTION [\#102](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/102)
+
+**Merged pull requests:**
+
+- Wait for rethinkInit on app if it is available [\#109](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/109) ([daffl](https://github.com/daffl))
+- Update mocha to the latest version 🚀 [\#108](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/108) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Extended documentation for query customization [\#107](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/107) ([iduna-fly](https://github.com/iduna-fly))
+- Update semistandard to the latest version 🚀 [\#106](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/106) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+
 ## [v0.5.0](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.0) (2017-12-01)
 [Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.4.3...v0.5.0)
 
