@@ -202,7 +202,7 @@ Combined with `.createQuery(query)`, which returns a new RethinkDB query with th
 app.service('mesages').hooks({
   before: {
     find(context) {
-      const query = this.createQuery(context.params.query);
+      const query = context.service.createQuery(context.params.query);
       
       const searchString = "my search string";
       
