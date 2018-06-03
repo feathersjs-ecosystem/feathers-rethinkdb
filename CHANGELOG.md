@@ -1,5 +1,22 @@
 # Change Log
 
+## [v0.5.2](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.2) (2018-06-03)
+[Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.5.1...v0.5.2)
+
+**Closed issues:**
+
+- How do I add a custom method to the rethinkdb service ? [\#115](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/115)
+- how use  table- join ? [\#112](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/112)
+- Query $In Generating error when passed with more than 30 Values [\#111](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/111)
+- How to use Customizing the query [\#110](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/110)
+- Service hooks called multiple times  [\#80](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/80)
+
+**Merged pull requests:**
+
+- Update uberproto to the latest version 🚀 [\#116](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/116) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+- Update README.md [\#114](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/114) ([jontey](https://github.com/jontey))
+- Update README.md [\#113](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/113) ([zuck](https://github.com/zuck))
+
 ## [v0.5.1](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.1) (2018-02-10)
 [Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.5.0...v0.5.1)
 
