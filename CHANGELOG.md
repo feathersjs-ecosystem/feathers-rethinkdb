@@ -1,5 +1,19 @@
 # Change Log
 
+## [v0.5.3](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.3) (2018-10-21)
+[Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.5.2...v0.5.3)
+
+**Closed issues:**
+
+- An in-range update of @feathersjs/socketio is breaking the build 🚨 [\#122](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/122)
+- An in-range update of debug is breaking the build 🚨 [\#121](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/121)
+- Missing TypeScript Support/Typings Support [\#117](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/issues/117)
+
+**Merged pull requests:**
+
+- Allow special parameters to also be passed as an array [\#123](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/123) ([daffl](https://github.com/daffl))
+- Update debug to the latest version 🚀 [\#120](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/120) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
+
 ## [v0.5.2](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.2) (2018-06-03)
 [Full Changelog](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/compare/v0.5.1...v0.5.2)
 
@@ -29,7 +43,7 @@
 
 - Wait for rethinkInit on app if it is available [\#109](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/109) ([daffl](https://github.com/daffl))
 - Update mocha to the latest version 🚀 [\#108](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/108) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
-- Extended documentation for query customization [\#107](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/107) ([iduna-fly](https://github.com/iduna-fly))
+- Extended documentation for query customization [\#107](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/107) ([ghost](https://github.com/ghost))
 - Update semistandard to the latest version 🚀 [\#106](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/pull/106) ([greenkeeper[bot]](https://github.com/apps/greenkeeper))
 
 ## [v0.5.0](https://github.com/feathersjs-ecosystem/feathers-rethinkdb/tree/v0.5.0) (2017-12-01)
