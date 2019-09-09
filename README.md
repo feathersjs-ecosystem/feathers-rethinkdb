@@ -1,5 +1,7 @@
 # feathers-rethinkdb
 
+> __Unmaintained:__ This project is no longer maintained
+
 [![Greenkeeper badge](https://badges.greenkeeper.io/feathersjs-ecosystem/feathers-rethinkdb.svg)](https://greenkeeper.io/)
 
 [![Build Status](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb.png?branch=master)](https://travis-ci.org/feathersjs-ecosystem/feathers-rethinkdb)
